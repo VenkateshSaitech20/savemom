@@ -36,7 +36,3 @@
    ```
 
 If everything is set up correctly, the application should load at this URL.
-
-## Notes:
-- Make sure that the Prisma configuration in the project is set up to correctly point to your MySQL instance.
-- If you encounter errors during the `npx prisma migrate` steps, you might need to verify your Prisma schema or database connection.
