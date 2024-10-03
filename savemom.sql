@@ -790,7 +790,7 @@ CREATE TABLE `user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 INSERT INTO `user` (`id`,`name`,`email`,`password`,`contactNo`,`address`,`state`,`zipCode`,`country`,`language`,`companyName`,`roleId`,`roleName`,`profileStatus`,`image`,`isDeleted`,`createdBy`,`subscriptionPlan`,`createdAt`,`updatedAt`) VALUES 
- ('cm1qdx6wo0001df6d78secy8y','Super Admin','superadmin@gmail.com','$2b$10$oM6DSgMbzlaEJ0bq4lr1COrYFJ7KpnuEzrB8p0kCaTubBG7UndTZW','','','','','',NULL,'','1','super admin','Active','http://localhost:3000/uploads/1727789969182_image.png','N','cm1qdx6wo0001df6d78secy8y',NULL,'2024-10-01 11:58:16.633','2024-10-01 13:39:29.186'),
+ ('cm1qdx6wo0001df6d78secy8y','Super Admin','superadmin@gmail.com','$2b$10$oM6DSgMbzlaEJ0bq4lr1COrYFJ7KpnuEzrB8p0kCaTubBG7UndTZW','','','','','',NULL,'','1','super admin','Active','http://localhost:3000/uploads/1727789969182_image.png','N','',NULL,'2024-10-01 11:58:16.633','2024-10-01 13:39:29.186'),
  ('cm1qhcr4z000e123qm8lpaoix','Arun Kumar','arun@gmail.com','$2b$10$vm5qJNVkXzMGbaHfCLGnW.5Lk5X0tLldcirrEXjXczVZuUC0dXwhu','9685858596',NULL,NULL,NULL,'India',NULL,'','cm1qhb60m000d123qi6c7gve1','Manager','Active',NULL,'N','cm1qdx6wo0001df6d78secy8y',NULL,'2024-10-01 13:34:21.539','2024-10-01 13:34:48.796');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
