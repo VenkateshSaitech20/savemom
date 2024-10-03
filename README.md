@@ -20,33 +20,16 @@
    https://www.apachefriends.org/download.html
    ```
 
-6. Run the initial Prisma migration:
-   ```bash
-   npx prisma migrate dev --name init
-   ```
-
-7. Generate the Prisma client:
-   ```bash
-   npx prisma generate
-   ```
-
-9. Deploy any remaining migrations:
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-11. Import the `menu.sql` file into the `menu` table in the `savemom` database. You can find the `menu.sql` file in the project folder:
+5. Import the `savemom.sql` file in the `savemom` database. You can find the `savemom.sql` file in the project folder:
    - Open phpMyAdmin (or your preferred MySQL client).
-   - Select the `savemom` database.
-   - Import the `menu.sql` file into the `menu` table.
 
-12. Finally, run the development server:
+6. Finally, run the development server:
    ```bash
    npm run dev
    ```
 
 ## Step 3: Access the application
-10. After running the above commands, open your browser and go to:
+7. After running the above commands, open your browser and go to:
 
    ```bash
    http://localhost:3000/
