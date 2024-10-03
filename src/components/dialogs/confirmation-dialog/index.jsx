@@ -72,6 +72,7 @@ const ConfirmationDialog = ({ open, setOpen, type, onConfirm, errorMsg }) => {
               {type === 'delete-testimonial' && 'Are you sure you want to delete testimonial?'}
               {type === 'delete-feature' && 'Are you sure you want to delete feature?'}
               {type === 'delete-team' && 'Are you sure you want to delete team?'}
+              {type === 'delete-key-achievement' && 'Are you sure you want to delete key achievement?'}
               {type === 'payment-method' && 'Are you sure you want to delete payment method?'}
               {type === 'delete-account' && 'Are you sure you want to deactivate your account?'}
               {type === 'delete-brand' && 'Are you sure you want to delete brand?'}

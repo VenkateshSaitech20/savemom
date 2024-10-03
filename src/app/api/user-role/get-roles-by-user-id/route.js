@@ -11,21 +11,20 @@ export async function POST(req) {
         let { searchText, page, pageSize } = body;
         if (!token.id) {
             return NextResponse.json({ result: false, message: { invalidToken: responseData.invalidToken } });
-        };
+        }
         let userId = token.id;
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
             return NextResponse.json({ result: false, message: { userNotFound: responseData.userNotFound } });
         }
-        if (user.roleId !== "1") {
-            userId = user.createdBy
-        }
         const queryFilter = {
             AND: [
-                { userId },
                 { isDeleted: 'N' }
             ]
         };
+        if (user.roleId !== '1') {
+            queryFilter.AND.push({ userId });
+        }
         if (searchText) {
             queryFilter.AND.push({
                 roleName: {
@@ -35,15 +34,13 @@ export async function POST(req) {
         }
         if (page && pageSize) {
             let skip = (page - 1) * pageSize;
-
             const totalCount = await prisma.role.count({
                 where: queryFilter
             });
-            // Ensure skip doesn't exceed totalCount
             if (skip >= totalCount) {
                 skip = totalCount - pageSize;
             }
-            if (skip < 0) skip = 0;  // Ensure skip is not negative
+            if (skip < 0) skip = 0;
             const getRoles = await prisma.role.findMany({
                 where: queryFilter,
                 select: {

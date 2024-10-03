@@ -391,7 +391,7 @@ const AchievementTable = ({ websiteSettingsPermission }) => {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                 />
-                <ConfirmationDialog open={open} setOpen={setOpen} type='delete-achievement' onConfirm={handleConfirmation} />
+                <ConfirmationDialog open={open} setOpen={setOpen} type='delete-key-achievement' onConfirm={handleConfirmation} />
             </Card>
             <AddAchievement
                 open={addAchievementOpen}
