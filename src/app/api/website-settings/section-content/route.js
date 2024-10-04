@@ -33,54 +33,62 @@ export async function POST(req) {
         }
         let userId = user.id;
         const body = await req.json();
-        let { badgeTitle, title, description, sectionType, id, isfrontendvisible } = body;
+        let { badgeTitle, title, description, sectionType, id, isfrontendvisible, discount } = body;
         if (sectionType === "brand" || sectionType === "key_achievements") {
             const data = { sectionType, isfrontendvisible };
             if (id) {
                 data.updatedUser = userId;
                 await prisma.section_content.update({ where: { id }, data })
                 return NextResponse.json({ result: true, message: responseData.dataUpdated });
+            } else {
+                data.createdUser = userId;
+                await prisma.section_content.create({ data });
+                return NextResponse.json({ result: true, message: responseData.dataCreateded });
             }
-            data.createdUser = userId;
-            await prisma.section_content.create({ data });
-            return NextResponse.json({ result: true, message: responseData.dataCreateded });
         }
-        else {
-            const emptyFieldErrors = {};
-            if (badgeTitle.trim() === "") {
-                emptyFieldErrors.badgeTitle = registerData.badgeTitleReq;
-            }
-            if (title.trim() === "") {
-                emptyFieldErrors.title = registerData.titleReq;
-            }
-            if (description.trim() === "") {
-                emptyFieldErrors.description = registerData.descriptionReq;
-            }
-            if (Object.keys(emptyFieldErrors).length > 0) {
-                return NextResponse.json({ result: false, message: emptyFieldErrors });
-            };
-            const fields = { badgeTitle, title, description, sectionType, isfrontendvisible };
-            const validatingFields = {
-                badgeTitle: { type: "name", message: registerData.badgeFieldVal },
-                title: { type: "name", message: registerData.titleFieldVal },
-                description: { type: "description", message: registerData.descriptionFieldVal },
-            };
-            let fieldErrors = validateFields(fields, validatingFields);
-            if (Object.keys(fieldErrors).length > 0) {
-                return NextResponse.json({ result: false, message: fieldErrors });
-            };
-
-            const data = { badgeTitle, title, description, sectionType, isfrontendvisible };
-            if (id) {
-                data.updatedUser = userId;
-                await prisma.section_content.update({ where: { id }, data })
-                return NextResponse.json({ result: true, message: responseData.dataUpdated });
-            }
-            data.createdUser = userId;
-            await prisma.section_content.create({ data });
-            return NextResponse.json({ result: true, message: responseData.dataCreateded });
+        const emptyFieldErrors = {};
+        if (badgeTitle.trim() === "") {
+            emptyFieldErrors.badgeTitle = registerData.badgeTitleReq;
         }
+        if (title.trim() === "") {
+            emptyFieldErrors.title = registerData.titleReq;
+        }
+        if (description.trim() === "") {
+            emptyFieldErrors.description = registerData.descriptionReq;
+        }
+        if (Object.keys(emptyFieldErrors).length > 0) {
+            return NextResponse.json({ result: false, message: emptyFieldErrors });
+        }
+        let fields = { badgeTitle, title, description, sectionType, isfrontendvisible };
+        let validatingFields = {
+            badgeTitle: { type: "name", message: registerData.badgeFieldVal },
+            title: { type: "name", message: registerData.titleFieldVal },
+            description: { type: "description", message: registerData.descriptionFieldVal },
+        };
+        if (sectionType === "plans") {
+            fields = { ...fields, discount };
+            validatingFields = {
+                ...validatingFields,
+                discount: { type: "discount", message: registerData.discountFieldVal }
+            };
+        }
+        let fieldErrors = validateFields(fields, validatingFields);
+        if (Object.keys(fieldErrors).length > 0) {
+            return NextResponse.json({ result: false, message: fieldErrors });
+        }
+        let data = { badgeTitle, title, description, sectionType, isfrontendvisible };
+        if (sectionType === "plans") {
+            data = { ...data, discount };
+        }
+        if (id) {
+            data.updatedUser = userId;
+            await prisma.section_content.update({ where: { id }, data });
+            return NextResponse.json({ result: true, message: responseData.dataUpdated });
+        }
+        data.createdUser = userId;
+        await prisma.section_content.create({ data });
+        return NextResponse.json({ result: true, message: responseData.dataCreateded });
     } catch (error) {
-        return NextResponse.json({ result: false, message: error });
+        return NextResponse.json({ result: false, message: error.message });
     }
-};
+}

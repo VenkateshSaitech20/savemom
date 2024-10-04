@@ -34,9 +34,13 @@ export async function POST(req) {
                 ] : [])
             ]
         };
+        const totalCount = await prisma.sent_emails.count({ where: queryFilter });
+        if (skip >= totalCount) {
+            skip = totalCount - pageSize;
+        }
+        if (skip < 0) skip = 0;
+        const totalPages = Math.ceil(totalCount / pageSize);
         const emails = await prisma.sent_emails.findMany({ where: queryFilter, skip, take: pageSize, orderBy: { id: 'desc' } });
-        const totalEmails = await prisma.sent_emails.count({ where: queryFilter });
-        const totalPages = Math.ceil(totalEmails / pageSize);
         if (emails) {
             return NextResponse.json({ result: true, message: emails, totalPages });
         } else {

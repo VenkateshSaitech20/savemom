@@ -1,17 +1,15 @@
 'use client'
 import Grid from '@mui/material/Grid';
-import PlanTable from './PlanTable';
 import SubUserPermission from '@/utils/SubUserPermission';
+import PlansSection from './PlansSection';
 
 const Plan = () => {
-
-    const { websiteSettingsPermission } = SubUserPermission();
-
     return (
         <Grid container spacing={6}>
             <Grid item xs={12}>
-                <PlanTable websiteSettingsPermission={websiteSettingsPermission} />
+                <PlansSection />
             </Grid>
+
         </Grid>
     )
 }

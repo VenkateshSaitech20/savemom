@@ -80,6 +80,8 @@ const ConfirmationDialog = ({ open, setOpen, type, onConfirm, errorMsg }) => {
               {type === 'suspend-account' && 'Are you sure?'}
               {type === 'delete-order' && 'Are you sure?'}
               {type === 'delete-customer' && 'Are you sure?'}
+              {type === 'delete-template' && 'Are you sure you want to delete template?'}
+              {type === 'delete-country' && 'Are you sure want to delete the country?'}
             </Typography>
             {type === 'suspend-account' && (
               <Typography color='text.primary'>You won&#39;t be able to revert user!</Typography>

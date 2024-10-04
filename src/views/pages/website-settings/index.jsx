@@ -21,6 +21,7 @@ const WebsiteSettings = ({ tabContentList }) => {
                         <Tab label='Testimonial' value='testimonial' />
                         <Tab label='Brand' value='brand' />
                         <Tab label='Our Team' value='our-team' />
+                        <Tab label='Plans' value='plan' />
                         <Tab label='Key Achievements' value='key-achievements' />
                         <Tab label='Faqs' value='faqs' />
                         <Tab label='Contact Us' value='contact-us' />

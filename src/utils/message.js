@@ -56,7 +56,11 @@ export const registerData = {
   privateKeyReq: "Private Key is required",
   typeReq: "Type is required",
   keymetricsReq: "Keymetrics is required ",
-  highlightReq: "Highlight is required",
+  categoryReq: "Category is required",
+  sortnameReq: "Short Name is required",
+  phnCodeReq: "Phone Code is required",
+  discountReq: "Discount is required",
+
   // Validation message
   phnLength: 10,
   phoneValLengthMsg: 'Phone number must be exactly 10 digits.',
@@ -67,8 +71,11 @@ export const registerData = {
   accountPendingMsg: 'Account is not verified. Please contact admin',
   accountInactiveMsg: 'Account is not active. Please contact admin',
   paymentgatewayMsg: "You can't delete this. Because you choose this method as a primary",
+  categoryValMsg: 'Invalid category',
   nameFieldVal: "Name should only contain letters and spaces",
   countryFieldVal: "Country should only contain letters and spaces",
+  sortnameFieldVal: "Short Name should only contain letters.",
+  phoneCodeFieldVal: "Phone Code should only contain numbers.",
   companyFieldVal: "Company should only contain letters and spaces",
   statusFieldVal: "Status should only contain letters and spaces",
   roleFieldVal: "Role should only contain letters and spaces",
@@ -88,10 +95,11 @@ export const registerData = {
   questionFieldVal: "Question should only contain letters and spaces and some special charactors",
   answerFieldVal: "Answer should only contain letters and spaces and some special charactors",
   typeFieldVal: "Type should only contain letters and spaces",
-  // Others
-  landingPageVisibleLabel: "Is landing page visible?",
+  discountFieldVal: "Discount should only contain number and range between 1 to 100",
   keyMetricFieldVal: "KeyMetric should only contain letters and spaces and some special charactors",
   highlightFieldVal: "Highlight should only contain letters and spaces and some special charactors",
+  // Others
+  landingPageVisibleLabel: "Is landing page visible?",
 }
 
 export const responseData = {
@@ -102,8 +110,12 @@ export const responseData = {
   profileUpdated: "Profile updated successfully",
   emailExists: "Email already taken",
   roleExist: "Role Name already exist",
+  countryExists: "Country already exists",
+  sortnameExists: "Short Name already exists",
+  phnCodeExists: "Phone Code already exists",
   delSuccess: "Data deleted successfully",
   userDeleted: "User deleted successfully",
+  categoryAlreadyExist: "Category already exist",
   testimonialDeleted: "Testimonial deleted successfully",
   roleDel: "Role deleted successfully",
   notFound: "No data found",
@@ -111,6 +123,7 @@ export const responseData = {
   noEmailFound: "No email found",
   notValiduser: "You cant update the user profile",
   contactNoExists: "Mobile No already taken",
+  titleExists: "Title already exist",
   menuAdded: "Menu added successfully",
   menuExists: "Menu already exist",
   passwordMismatch: "Password do not match",
@@ -128,6 +141,8 @@ export const responseData = {
   invalidFileType: "Invalid file type. Only JPG and PNG are allowed",
   dataUpdated: "Data updated successfully",
   dataCreateded: "Data created successfully",
+  templateCreateded: "Template created successfully",
+  templateupdated: "Template updated successfully",
   noData: "No data",
   enquirySubmitted: "Enquiry submitted successfully",
   emailSubscribed: "News letter subscribed",
@@ -178,3 +193,10 @@ export const emailType = [
 ];
 
 export const types = [{ id: "1", type: 'Live' }, { id: "2", type: 'Demo' }];
+
+export const status = [
+  { id: 1, value: 'Y', name: "Active" },
+  { id: 2, value: 'N', name: "In Active" }
+]
+
+export const validity = { monthly: "28", yearly: "365" };

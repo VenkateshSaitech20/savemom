@@ -55,17 +55,21 @@ export async function POST(req) {
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
         };
-        const dashboardImageLight = formData.get('dashboardImageLight');
-        const dashboardImageDark = formData.get('dashboardImageDark');
-        const files = { dashboardImageLight, dashboardImageDark };
+        const image1 = formData.get('dashboardImageLight');
+        const image2 = formData.get('dashboardImageDark');
+        const files = { image1, image2 };
         const { profileImageUrls, errors } = await processFiles(files, uploadDir, urlDir);
+        if (Object.keys(errors).length > 0) {
+            console.log("File processing errors:", errors);
+            return NextResponse.json({ result: false, message: errors });
+        }
         const data = {
             title: bannerText,
             description: bannerSubText,
             badgeTitle: buttonText,
             sectionType: sectionType,
-            image1: profileImageUrls.dashboardImageLight ? profileImageUrls.dashboardImageLight : null,
-            image2: profileImageUrls.dashboardImageDark ? profileImageUrls.dashboardImageDark : null,
+            image1: profileImageUrls.image1 ? profileImageUrls.image1 : null,
+            image2: profileImageUrls.image2 ? profileImageUrls.image2 : null,
             isfrontendvisible
         }
         if (id) {
@@ -80,12 +84,14 @@ export async function POST(req) {
             });
             const baseDir = `${process.env.MAIN_FOLDER_PATH}`;
             const filteredFiles = Object.entries(files).filter(([key, file]) => file !== null);
-            filteredFiles.map(async ([key, file]) => {
+            filteredFiles.forEach(async ([key, file]) => {
                 if (file) {
                     const oldImageUrl = existingBannerDetails[key];
-                    const oldFilePath = getFilePathFromUrl(oldImageUrl, baseDir);
                     try {
-                        await deleteFile(oldFilePath);
+                        if (oldImageUrl !== null || !oldImageUrl) {
+                            const oldFilePath = getFilePathFromUrl(oldImageUrl, baseDir);
+                            await deleteFile(oldFilePath);
+                        }
                     } catch (error) {
                         console.error('Failed to delete old system image:', error);
                     }

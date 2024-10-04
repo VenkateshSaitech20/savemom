@@ -17,7 +17,7 @@ import PropTypes from "prop-types";
 
 const LandingPageWrapper = ({ mode }) => {
   const { updatePageSettings } = useSettings()
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -60,9 +60,9 @@ const LandingPageWrapper = ({ mode }) => {
         <div className='bg-backgroundPaper'>
           {data['banner_section']?.isfrontendvisible === "Y" && (<HeroSection mode={mode} data={data['banner_section']} />)}
           {data['feature']?.isfrontendvisible === "Y" && (<UsefulFeature data={data['feature']} />)}
-          {data['testimonial']?.isfrontendvisible === "Y" && (<CustomerReviews data={data['testimonial']} brand={data['brand']} />)}
+          {(data['testimonial']?.isfrontendvisible === "Y" || data['brand']?.isfrontendvisible === "Y") && (<CustomerReviews data={data['testimonial']} brand={data['brand']} />)}
           {data['our_team']?.isfrontendvisible === "Y" && (<OurTeam data={data['our_team']} />)}
-          <Pricing />
+          {data['plans']?.isfrontendvisible === "Y" && (<Pricing data={data['plans']} />)}
           {data['key_achievements']?.isfrontendvisible === "Y" && (<ProductStat data={data['key_achievements']} />)}
           {data['faq']?.isfrontendvisible === "Y" && (<Faqs data={data['faq']} />)}
           <GetStarted mode={mode} />

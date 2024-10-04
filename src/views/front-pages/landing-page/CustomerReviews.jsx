@@ -9,7 +9,6 @@ import classnames from 'classnames';
 import CustomIconButton from '@core/components/mui/IconButton';
 import AppKeenSlider from '@/libs/styles/AppKeenSlider';
 import frontCommonStyles from '@views/front-pages/styles.module.css';
-import styles from './styles.module.css';
 import { useCallback, useEffect, useState } from 'react';
 import apiClient from '@/utils/apiClient';
 import Loader from '@/components/loader';
@@ -109,9 +108,12 @@ const CustomerReviews = ({ data, brand }) => {
   return (
     <>
       {(isLoading) && <Loader />}
-      {!isLoading && (
+      {data?.isfrontendvisible === "Y" && (
         <section
-          className={classnames('flex flex-col pbs-[88px] pbe-[100px] bg-backgroundDefault', styles.sectionStartRadius)}
+          className={classnames('flex flex-col pbs-[88px] pbe-[50px] bg-backgroundDefault')}
+          style={{
+            paddingBottom: brand?.isfrontendvisible === "N" ? '100px' : ''
+          }}
         >
           <div
             className={classnames('flex max-md:flex-col max-sm:flex-wrap is-full gap-6', frontCommonStyles.layoutSpacing)}
@@ -169,17 +171,22 @@ const CustomerReviews = ({ data, brand }) => {
               </AppKeenSlider>
             </div>
           </div>
-          {brand?.isfrontendvisible === "Y" && (
-            <>
-              <Divider className='mbs-[100px] mbe-8' />
-              <div className='flex flex-wrap items-center justify-center gap-x-16 gap-y-6 mli-3'>
-                {brandImages?.map((item) => (
-                  <img src={item.image} key={item.id} alt='Brand' className='w-[100px] h-[30px]' style={{ color: 'var(--mui-palette-text-secondary)' }} />
-                ))}
-              </div>
-            </>
-          )}
         </section>
+      )}
+      {brand?.isfrontendvisible === "Y" && (
+        <section
+          className={classnames('flex flex-col pbe-[100px] bg-backgroundDefault')}
+          style={{
+            paddingTop: data?.isfrontendvisible === "N" ? '100px' : ''
+          }}
+        >
+          {data?.isfrontendvisible === "Y" && (<Divider className=' mbe-8' />)}
+          <div className='flex flex-wrap items-center justify-center gap-x-16 gap-y-6 mli-3'>
+            {brandImages?.map((item) => (
+              <img src={item.image} key={item.id} alt='Brand' className='w-[100px] h-[30px]' style={{ color: 'var(--mui-palette-text-secondary)' }} />
+            ))}
+          </div>
+        </section >
       )}
     </>
 
@@ -189,4 +196,5 @@ CustomerReviews.propTypes = {
   data: PropTypes.any,
   brand: PropTypes.any,
 };
+
 export default CustomerReviews

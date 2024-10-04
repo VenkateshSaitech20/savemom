@@ -11,6 +11,7 @@ const SubUserPermission = () => {
     const [websiteSettingsPermission, setWebsiteSettingsPermission] = useState({});
     const [configureSubscriptionPermission, setConfigureSubscriptionPermission] = useState({});
     const [mySubscriptionPermission, setMySubscriptionPermission] = useState({});
+    const [emailPermission, setEmailPermission] = useState({});
 
     const fetchPermissions = useCallback(async () => {
         const response = await apiClient.post('/api/menu/permissions', {});
@@ -24,13 +25,14 @@ const SubUserPermission = () => {
             setWebsiteSettingsPermission(permissions["website-settings"] || {});
             setConfigureSubscriptionPermission(permissions["configure-subscription"] || []);
             setMySubscriptionPermission(permissions["my-subscription"] || []);
+            setEmailPermission(permissions["email"] || []);
         }
     }, []);
 
     useEffect(() => {
         fetchPermissions();
     }, [fetchPermissions]);
-    return { dashboardPermission, manageRolesPermission, manageUsersPermission, accountSettingsPermission, systemSettingsPermission, websiteSettingsPermission, configureSubscriptionPermission, mySubscriptionPermission };
+    return { dashboardPermission, manageRolesPermission, manageUsersPermission, accountSettingsPermission, systemSettingsPermission, websiteSettingsPermission, configureSubscriptionPermission, mySubscriptionPermission, emailPermission };
 };
 
 export default SubUserPermission;

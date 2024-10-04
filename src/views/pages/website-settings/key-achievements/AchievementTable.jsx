@@ -30,7 +30,7 @@ import { getLocalizedUrl } from '@/utils/i18n';
 import tableStyles from '@core/styles/table.module.css';
 import Loader from '@/components/loader';
 import ConfirmationDialog from '@/components/dialogs/confirmation-dialog';
-import { pageList, responseData } from '@/utils/message';
+import { pageList, registerData, responseData } from '@/utils/message';
 import apiClient from '@/utils/apiClient';
 import { signOut } from 'next-auth/react';
 import AddAchievement from './AddAchievement';
@@ -265,8 +265,8 @@ const AchievementTable = ({ websiteSettingsPermission }) => {
         setIsLoading(true);
         const response = await apiClient.get(`/api/website-settings/section-content?sectionType=${sectionType}`);
         if (response.data.result === true) {
-            const { id, badgeTitle, title, description } = response.data.message;
-
+            const { id } = response.data.message;
+            setChecked(response.data.message.isfrontendvisible === "Y" ? true : false);
             setId(id);
         }
         setIsLoading(false);
@@ -284,14 +284,9 @@ const AchievementTable = ({ websiteSettingsPermission }) => {
                             control={<Switch
                                 checked={checked} onChange={handleChange}
                             />}
-                            label="show/hide"
+                            label={registerData.landingPageVisibleLabel}
                             labelPlacement="start"
                             className='pbe-0'
-                            sx={{
-                                '& .MuiFormControlLabel-label': {
-                                    marginTop: '-4px',
-                                }
-                            }}
                         />
                     </FormGroup>
                 </div>

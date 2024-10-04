@@ -24,7 +24,7 @@ const ScrollWrapper = ({ children, isBelowLgScreen }) => {
 };
 
 const MailContentList = props => {
-    const { isInitialMount, isBelowSmScreen, isBelowLgScreen, reload, searchTerm, setDrawerOpen, setCurrentEmail } = props;
+    const { isInitialMount, isBelowSmScreen, isBelowLgScreen, reload, searchTerm, setDrawerOpen, setCurrentEmail, mailComposedStatus } = props;
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(Number(pageList[0].value));
     const [totalPages, setTotalPages] = useState();
@@ -72,6 +72,12 @@ const MailContentList = props => {
         }
     }, [getEmails, searchTerm]);
 
+    useEffect(() => {
+        if (mailComposedStatus === true) {
+            getEmails('');
+        }
+    }, [getEmails, mailComposedStatus]);
+
     if (isInitialMount) {
         return (
             <div className='flex items-center justify-center gap-2 grow is-full'>
@@ -84,7 +90,7 @@ const MailContentList = props => {
     if (emails.length === 0) {
         return (
             <div className='relative flex justify-center gap-2 grow is-full bg-backgroundPaper'>
-                {isLoading ? <Loader /> : <Typography className='m-3'>No emails found!</Typography>}
+                {isLoading ? <div className='relative overflow-hidden grow is-full mt-4'><Loader /></div> : <Typography className='m-3'>No emails found!</Typography>}
                 {reload && (
                     <Backdrop open={reload} className='absolute text-white z-10 bg-textDisabled'>
                         <CircularProgress color='inherit' />
@@ -112,7 +118,7 @@ const MailContentList = props => {
                                             <div className='flex items-center gap-2 overflow-hidden'>
                                                 <div className='flex gap-4 justify-between items-center overflow-hidden'>
                                                     <Typography variant='h6' className='whitespace-nowrap'>
-                                                        {email.from}
+                                                        {email.to.includes(',') ? `${email.to.split(',')[0]}...` : email.to}
                                                     </Typography>
                                                     <Typography variant='body2' noWrap>
                                                         {stripHTML(email.message)}
@@ -154,6 +160,7 @@ const MailContentList = props => {
                                     }}
                                     InputLabelProps={{ shrink: true }}
                                     variant='filled'
+                                    className='page-drop-size'
                                 >
                                     {pageList?.map(item => (
                                         <MenuItem key={item.value} value={item.value}>{item.value}</MenuItem>
@@ -187,7 +194,8 @@ MailContentList.propTypes = {
     reload: PropTypes.bool,
     searchTerm: PropTypes.string,
     setDrawerOpen: PropTypes.any,
-    setCurrentEmail: PropTypes.func
+    setCurrentEmail: PropTypes.func,
+    mailComposedStatus: PropTypes.bool
 };
 
 export default MailContentList;

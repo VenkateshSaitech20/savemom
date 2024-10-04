@@ -23,7 +23,7 @@ const EmailSetting = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const { register, handleSubmit, control, formState: { errors }, setValue } = useForm();
-    const { websiteSettingsPermission } = SubUserPermission();
+    const { emailPermission } = SubUserPermission();
     const [isPasswordShown, setIsPasswordShown] = useState(false);
 
     const handleClickShowPassword = () => setIsPasswordShown(show => !show)
@@ -147,7 +147,7 @@ const EmailSetting = () => {
                                 />
                             </Grid>
                             <Grid item xs={12} className='flex gap-4 flex-wrap'>
-                                {(websiteSettingsPermission?.editPermission === "Y" || websiteSettingsPermission?.writePermission === "Y") && (
+                                {(emailPermission?.editPermission === "Y" || emailPermission?.writePermission === "Y") && (
                                     <Button variant='contained' type='submit'>
                                         {isButtonLoading ? <Loader type="btnLoader" /> : "Save"}
                                     </Button>

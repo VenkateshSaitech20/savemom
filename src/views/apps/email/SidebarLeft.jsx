@@ -24,6 +24,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 
 // Styles Imports
 import styles from './styles.module.css'
+import PropTypes from 'prop-types'
 
 // Constants
 const icons = {
@@ -59,9 +60,10 @@ const SidebarLeft = props => {
         isBelowSmScreen,
         sidebarOpen,
         setSidebarOpen,
-        uniqueLabels,
         folder,
-        label
+        label,
+        setMailComposedStatus,
+        emailPermission
     } = props
 
     // States
@@ -99,11 +101,13 @@ const SidebarLeft = props => {
                     }
                 }}
             >
-                <CardContent>
-                    <Button color='primary' variant='contained' fullWidth onClick={() => setOpenCompose(true)}>
-                        Compose
-                    </Button>
-                </CardContent>
+                {((emailPermission?.editPermission === "Y" || emailPermission?.writePermission === "Y")) && (
+                    <CardContent>
+                        <Button color='primary' variant='contained' fullWidth onClick={() => setOpenCompose(true)}>
+                            Compose
+                        </Button>
+                    </CardContent>
+                )}
                 <ScrollWrapper isBelowLgScreen={isBelowLgScreen}>
                     <div className='flex flex-col gap-1 plb-4'>
                         {Object.entries(icons).map(([key, value]) => (
@@ -165,9 +169,24 @@ const SidebarLeft = props => {
                 setOpenCompose={setOpenCompose}
                 isBelowSmScreen={isBelowSmScreen}
                 isBelowMdScreen={isBelowMdScreen}
+                setMailComposedStatus={setMailComposedStatus}
+                emailPermission={emailPermission}
             />
         </>
     )
+}
+
+SidebarLeft.propTypes = {
+    store: PropTypes.any,
+    isBelowLgScreen: PropTypes.any,
+    isBelowMdScreen: PropTypes.any,
+    isBelowSmScreen: PropTypes.any,
+    sidebarOpen: PropTypes.any,
+    folder: PropTypes.any,
+    label: PropTypes.any,
+    setSidebarOpen: PropTypes.any,
+    setMailComposedStatus: PropTypes.any,
+    emailPermission: PropTypes.any
 }
 
 export default SidebarLeft

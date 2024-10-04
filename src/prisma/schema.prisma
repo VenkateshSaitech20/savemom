@@ -211,8 +211,14 @@ model subscribers {
 model country {
   id        Int      @id @default(autoincrement())
   name      String
+  sortname  String   @db.VarChar(3)
+  phoneCode String   @db.VarChar(8)
+  createdUser String?
   createdAt DateTime @default(now())
+  updatedUser String?
   updatedAt DateTime @updatedAt
+  isDeleted String   @default("N")
+  isActive  String   @default("Y")
 }
 
 model state {
@@ -253,6 +259,7 @@ model section_content {
   image1                String?
   image2                String?
   isfrontendvisible     String?   @default("Y")
+  discount              String?
   createdUser           String?
   updatedUser           String?
   createdAt             DateTime  @default(now())
@@ -292,6 +299,8 @@ model sent_emails {
   to                  String?   @db.LongText
   subject             String?   @db.LongText
   message             String?   @db.LongText
+  templateId          Int?
+  templateCategory    String?
   sentBy              String?
   sendMailTo          String?
   createdAt           DateTime  @default(now())
@@ -303,6 +312,7 @@ model email_templates {
   slugCategory        String? 
   message             String?   @db.LongText
   isActive            String?
+  isDeleted           String?   @default("N")
   createdBy           String?
   updatedBy           String?
   createdAt           DateTime  @default(now())

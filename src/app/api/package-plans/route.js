@@ -94,7 +94,7 @@ export async function POST(req) {
             const updatedPackage = await prisma.package_plans.update({ where: { id: existingRec.id }, data });
 
             const filteredFiles = Object.entries(files).filter(([key, file]) => file !== null);
-            filteredFiles.map(async ([key, file]) => {
+            filteredFiles.forEach(async ([key, file]) => {
                 if (file) {
                     const oldImageUrl = existingRec[key];
                     const oldFilePath = getFilePathFromUrl(oldImageUrl, baseDir);
@@ -107,7 +107,6 @@ export async function POST(req) {
             })
             return NextResponse.json({ result: true, message: updatedPackage });
         } else {
-            data.createdUser = userId;
             await prisma.package_plans.create({ data });
             return NextResponse.json({ result: true, message: responseData.dataCreateded });
         }

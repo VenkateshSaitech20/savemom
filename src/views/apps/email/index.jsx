@@ -10,6 +10,7 @@ import SidebarLeft from './SidebarLeft';
 import MailContent from './MailContent';
 import { useSettings } from '@core/hooks/useSettings';
 import { commonLayoutClasses } from '@layouts/utils/layoutClasses';
+import SubUserPermission from '@/utils/SubUserPermission';
 
 const EmailWrapper = ({ folder, label }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,6 +23,8 @@ const EmailWrapper = ({ folder, label }) => {
     const isBelowMdScreen = useMediaQuery(theme => theme.breakpoints.down('md'));
     const isBelowSmScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
     const uniqueLabels = [...new Set(emailStore.emails.flatMap(email => email.labels))]
+    const [mailComposedStatus, setMailComposedStatus] = useState(false);
+    const { emailPermission } = SubUserPermission();
 
     const handleBackdropClick = () => {
         setSidebarOpen(false)
@@ -71,6 +74,8 @@ const EmailWrapper = ({ folder, label }) => {
                 folder={folder}
                 uniqueLabels={uniqueLabels}
                 label={label || ''}
+                setMailComposedStatus={setMailComposedStatus}
+                emailPermission={emailPermission}
             />
             <Backdrop open={backdropOpen} onClick={handleBackdropClick} className='absolute z-10' />
             <MailContent
@@ -85,6 +90,8 @@ const EmailWrapper = ({ folder, label }) => {
                 isBelowMdScreen={isBelowMdScreen}
                 isBelowSmScreen={isBelowSmScreen}
                 setBackdropOpen={setBackdropOpen}
+                mailComposedStatus={mailComposedStatus}
+                emailPermission={emailPermission}
             />
         </div>
     )

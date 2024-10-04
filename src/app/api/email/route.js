@@ -18,7 +18,7 @@ export async function POST(req) {
     }
     let userId = token.id;
     const body = await req.json();
-    const { to, subject, message, sendMailTo } = body;
+    const { to, subject, message, sendMailTo, templateId, templateCategory } = body;
     const emptyFieldErrors = {};
     const email = await nodemailerCredential();
     const transporter = await createTransporter();
@@ -43,7 +43,9 @@ export async function POST(req) {
                 subject: subject,
                 message: message,
                 sendMailTo: sendMailTo,
-                sentBy: userId
+                sentBy: userId,
+                templateId: templateId,
+                templateCategory: templateCategory
             },
         });
         return NextResponse.json({ result: true, message: responseData.emailSentSuccMsg });
@@ -71,7 +73,9 @@ export async function POST(req) {
                     subject: subject,
                     message: message,
                     sendMailTo: sendMailTo,
-                    sentBy: userId
+                    sentBy: userId,
+                    templateId: templateId,
+                    templateCategory: templateCategory
                 },
             });
             await transporter.sendMail(customMailOptions);

@@ -12,10 +12,12 @@ import EmailPage from '@views/pages/email';
 
 const EmailWrapper = dynamic(() => import('@views/apps/email'))
 const EmailSetting = dynamic(() => import('@views/apps/email/setting'))
+const EmailTemplate = dynamic(() => import('@views/apps/email/template'))
 
 const tabContentList = () => ({
   'channel': <EmailWrapper folder='sent' />,
-  'setting': <EmailSetting />
+  'setting': <EmailSetting />,
+  'template': <EmailTemplate />
 })
 
 const EmailPageSetting = () => {

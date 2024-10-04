@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import Button from '@mui/material/Button';
@@ -8,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
+import Link from '@components/Link';
 import classnames from 'classnames';
 import { rankItem } from '@tanstack/match-sorter-utils';
 import PropTypes from "prop-types";
@@ -25,18 +25,18 @@ import {
 } from '@tanstack/react-table';
 import TextFieldStyled from '@core/components/mui/TextField';
 import TablePaginationComponent from '@components/TablePaginationComponent';
-import { getLocalizedUrl } from '@/utils/i18n';
+// import { getLocalizedUrl } from '@/utils/i18n';
 import tableStyles from '@core/styles/table.module.css';
 import Loader from '@/components/loader';
 import ConfirmationDialog from '@/components/dialogs/confirmation-dialog';
+import OpenDialogOnElementClick from '@components/dialogs/OpenDialogOnElementClick';
+import CountryDialog from '@components/dialogs/edit-country-info';
 import { pageList, responseData } from '@/utils/message';
 import apiClient from '@/utils/apiClient';
 import { signOut } from 'next-auth/react';
-import CustomAvatar from '@/@core/components/mui/Avatar';
-import AddPlan from './AddPlan';
-
+import Chip from '@mui/material/Chip'
+import AddCountry from './AddCountry';
 const Icon = styled('i')({})
-
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
     addMeta({
@@ -44,11 +44,9 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
     })
     return itemRank.passed
 };
-
 const columnHelper = createColumnHelper()
-
-const PlanTable = ({ websiteSettingsPermission }) => {
-    const [addPackageOpen, setAddPackageOpen] = useState(false)
+const CountryTable = ({ websiteSettingsPermission }) => {
+    const [addCountryOpen, setAddCountryOpen] = useState(false)
     const [rowSelection, setRowSelection] = useState({})
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -57,19 +55,27 @@ const PlanTable = ({ websiteSettingsPermission }) => {
     const [open, setOpen] = useState(false);
     const [idToDelete, setIdToDelete] = useState('');
     const [searchText, setSearchText] = useState('');
-    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(Number(pageList[0].value));
     const [totalPages, setTotalPages] = useState();
-
-    const handleDelete = async userId => {
-        setIdToDelete(userId);
+    const typographyProps = {
+        children: (
+            <IconButton >
+                <i className='bx-edit-alt text-textSecondary text-[22px]' />
+            </IconButton>
+        ),
+        component: Link,
+        color: 'primary',
+        onClick: e => e.preventDefault()
+    }
+    const handleDelete = async cId => {
+        setIdToDelete(cId);
         setOpen(true);
     };
-
-    const getPackageDetails = useCallback(async () => {
+    // const { lang: locale } = useParams()
+    const getCountries = useCallback(async () => {
         setIsLoading(true);
-        const response = await apiClient.post("/api/website-settings/package-plans/list", {
+        const response = await apiClient.post("/api/master-data-settings/country/list", {
             searchText,
             page: currentPage,
             pageSize
@@ -87,13 +93,18 @@ const PlanTable = ({ websiteSettingsPermission }) => {
             setIsLoading(false);
         }
     }, [searchText, currentPage, pageSize]);
-
+    const handleCountryAdded = () => {
+        getCountries();
+    };
+    useEffect(() => {
+        getCountries();
+    }, [getCountries]);
     const handleConfirmation = async (confirmed) => {
         setIsLoading(true);
         if (confirmed) {
-            const response = await apiClient.put('/api/package-plans', { id: idToDelete });
+            const response = await apiClient.put('/api/master-data-settings/country', { id: idToDelete });
             if (response.data.result === true) {
-                await getPackageDetails();
+                await getCountries();
                 setOpen(false);
             } else if (response.data.result === false) {
                 if (response?.data?.message?.roleError?.name === responseData.tokenExpired || response?.data?.message?.invalidToken === responseData.invalidToken) {
@@ -105,90 +116,56 @@ const PlanTable = ({ websiteSettingsPermission }) => {
         setIsLoading(false);
         setIdToDelete(null);
     };
-
-    const handleViewPackage = (id) => {
-        const url = getLocalizedUrl(`/pages/package-plans/${id}`, locale)
-        router.push(url);
+    const handleCountryUpdate = () => {
+        getCountries();
     };
-
-    useEffect(() => {
-        getPackageDetails()
-    }, [getPackageDetails]);
-
-    const { lang: locale } = useParams()
-
-    const getAvatar = params => {
-        const { avatar } = params
-
-        if (avatar) {
-            return <CustomAvatar src={avatar} size={34} />
-        }
-    }
-
     const columns = useMemo(() => {
         const canDelete = websiteSettingsPermission?.deletePermission === 'Y';
         const canEdit = websiteSettingsPermission?.editPermission === 'Y';
-
         const baseColumns = [
-            columnHelper.accessor('title', {
-                header: 'Title',
-                cell: ({ row }) => (
-                    <div className='flex items-center gap-4'>
-                        {getAvatar({ avatar: row.original.image })}
-                        <div className='flex flex-col'>
-                            <Typography variant='h6'>{row.original.title}</Typography>
-                        </div>
-                    </div>
-                )
-            }),
-            columnHelper.accessor('subtitle', {
-                header: 'subtitle',
-                cell: ({ row }) => (
-                    <div className='flex items-center gap-2'>
-                        <Typography className='capitalize' color='text.primary'>
-                            {row.original.subTitle}
-                        </Typography>
-                    </div>
-                )
-            }),
-            columnHelper.accessor('monthlyprice', {
-                header: 'monthly price',
-                cell: ({ row }) => (
-                    <div className='flex items-center gap-2'>
-                        <Typography className='capitalize' color='text.primary'>
-                            {row.original.monthlyPrice}
-                        </Typography>
-                    </div>
-                )
-            }),
-            columnHelper.accessor('annual price', {
-                header: 'annual price',
+            columnHelper.accessor('name', {
+                header: 'Country',
                 cell: ({ row }) => (
                     <div className='flex items-center gap-2'>
                         <Icon />
-                        <Typography className='capitalize' color='text.primary' >
-                            {row.original.yearlyPlan.monthly}/Month - {row.original.yearlyPlan.annually}/Year
+                        <Typography className='capitalize' color='text.primary'>
+                            {row.original.name}
                         </Typography>
                     </div>
                 )
             }),
-            columnHelper.accessor('Features', {
-                header: 'Features',
-                cell: ({ row }) => {
-                    const features = row.original.planBenefits;
-                    const featureList = features.map(feature => feature.feature).join(', ');
-                    return (
-                        <div className='flex items-center gap-2'>
-                            <Icon />
-                            <Typography className='capitalize truncate w-[350px]' color='text.primary'>
-                                {featureList}
-                            </Typography>
-                        </div>
-                    );
-                }
+            columnHelper.accessor('sortname', {
+                header: 'Short Name',
+                cell: ({ row }) => (
+                    <div className='flex items-center gap-2'>
+                        <Icon />
+                        <Typography color='text.primary' >
+                            {row.original.sortname}
+                        </Typography>
+                    </div>
+                )
             }),
+            columnHelper.accessor('phoneCode', {
+                header: 'Phone Code',
+                cell: ({ row }) => (
+                    <div className='flex items-center gap-2'>
+                        <Icon />
+                        <Typography color='text.primary' >
+                            {row.original.phoneCode}
+                        </Typography>
+                    </div>
+                )
+            }),
+            columnHelper.accessor('isActive', {
+                header: 'Status',
+                cell: ({ row }) => (
+                    <div className='flex items-center gap-2'>
+                        <Icon />
+                        <Chip label={row.original.isActive === 'Y' ? 'Yes' : 'No'} variant='tonal' size='small' color={row.original.isActive === 'Y' ? 'success' : 'error'} className='self-start' />
+                    </div>
+                )
+            })
         ];
-
         if (canDelete || canEdit) {
             baseColumns.push(
                 columnHelper.accessor('action', {
@@ -201,9 +178,12 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                                 </IconButton>
                             )}
                             {canEdit && (
-                                <IconButton onClick={() => handleViewPackage(row.original.id)}>
-                                    <i className='bx-show text-textSecondary text-[22px]' />
-                                </IconButton>
+                                <OpenDialogOnElementClick
+                                    element={Typography}
+                                    elementProps={typographyProps}
+                                    dialog={CountryDialog}
+                                    dialogProps={{ data: data, id: row.original.id, handleCountryUpdate }}
+                                />
                             )}
                         </div>
                     ),
@@ -211,10 +191,8 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                 })
             );
         }
-
         return baseColumns;
     }, [data, filteredData, websiteSettingsPermission]);
-
     const table = useReactTable({
         data: filteredData,
         columns,
@@ -244,11 +222,6 @@ const PlanTable = ({ websiteSettingsPermission }) => {
         getFacetedUniqueValues: getFacetedUniqueValues(),
         getFacetedMinMaxValues: getFacetedMinMaxValues()
     })
-
-    const handlePackageAdded = async () => {
-        await getPackageDetails();
-    };
-
     const handleSearchTextChange = (e) => {
         const text = e.target.value;
         setGlobalFilter(e.target.value);
@@ -256,7 +229,6 @@ const PlanTable = ({ websiteSettingsPermission }) => {
             setSearchText(text)
         }
     };
-
     return (
         <>
             <Card>
@@ -269,7 +241,7 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                             setPageSize(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className='max-sm:is-full sm:is-[70px]'
+                        className='page-drop-size'
                         InputLabelProps={{ shrink: true }}
                         variant='filled'
                     >
@@ -281,7 +253,7 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                         <TextFieldStyled
                             value={globalFilter ?? ''}
                             onChange={handleSearchTextChange}
-                            placeholder='Search Plan'
+                            placeholder='Search Country'
                             className='max-sm:is-full min-is-[220px]'
                             InputLabelProps={{ shrink: true }}
                             variant='filled'
@@ -290,10 +262,10 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                             <Button
                                 variant='contained'
                                 startIcon={<i className='bx-plus' />}
-                                onClick={() => setAddPackageOpen(!addPackageOpen)}
+                                onClick={() => setAddCountryOpen(!addCountryOpen)}
                                 className='max-sm:is-full'
                             >
-                                Add Plan
+                                Add Country
                             </Button>
                         )}
                     </div>
@@ -306,11 +278,10 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                                     {headerGroup.headers.map(header => (
                                         <th key={header.id}>
                                             {header.isPlaceholder ? null : (
-                                                <div
-                                                    className={classnames({
-                                                        'flex items-center': header.column.getIsSorted(),
-                                                        'cursor-pointer select-none': header.column.getCanSort()
-                                                    })}
+                                                <div className={classnames({
+                                                    'flex items-center': header.column.getIsSorted(),
+                                                    'cursor-pointer select-none': header.column.getCanSort()
+                                                })}
                                                     onClick={header.column.getToggleSortingHandler()}
                                                 >
                                                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -357,19 +328,19 @@ const PlanTable = ({ websiteSettingsPermission }) => {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                 />
-                <ConfirmationDialog open={open} setOpen={setOpen} type='delete-plan' onConfirm={handleConfirmation} />
+                <ConfirmationDialog open={open} setOpen={setOpen} type='delete-country' onConfirm={handleConfirmation} />
             </Card>
-            <AddPlan
-                open={addPackageOpen}
-                handleClose={() => setAddPackageOpen(!addPackageOpen)}
-                handlePackageAdded={handlePackageAdded}
+            <AddCountry
+                open={addCountryOpen}
+                handleClose={() => setAddCountryOpen(!addCountryOpen)}
+                handleCountryAdded={handleCountryAdded}
             />
         </>
     )
 }
 
-PlanTable.propTypes = {
+CountryTable.propTypes = {
     websiteSettingsPermission: PropTypes.any,
 }
 
-export default PlanTable
+export default CountryTable

@@ -96,7 +96,7 @@ export const validateText = (text, type, validateMessage) => {
             message = validateMessage;
             break;
         case 'description':
-            regex = /^[a-zA-Z0-9 .,?-]*$/;
+            regex = /^[a-zA-Z0-9 .,?+-]*$/;
             maxLength = 500;
             lengthMessage = `Description must not exceed ${maxLength} characters`;
             message = validateMessage;
@@ -142,6 +142,24 @@ export const validateText = (text, type, validateMessage) => {
             regex = /^[a-zA-Z0-9\s.,()'"\/,&%+-]*$|^$/;
             maxLength = 50;
             lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
+        case 'descriptionXL':
+            regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/,&-]*$|^$/; // Description
+            maxLength = 3000;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
+        case 'sortname':
+            regex = /^[A-Z]{2,3}$/;
+            maxLength = 3;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
+        case 'discount':
+            regex = /^(100|[1-9][0-9]?|[1-9])$/;  // Matches 1-99 or 100
+            maxLength = 3;
+            lengthMessage = registerData.discountFieldVal;
             message = validateMessage;
             break;
         default:

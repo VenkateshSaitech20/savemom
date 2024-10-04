@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -23,6 +23,9 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import PropTypes from 'prop-types';
 
 const EditorToolbar = ({ editor }) => {
     if (!editor) {
@@ -112,18 +115,17 @@ const EditorToolbar = ({ editor }) => {
 }
 
 const ComposeMail = props => {
-    const { openCompose, setOpenCompose, isBelowSmScreen, isBelowMdScreen } = props;
+    const { openCompose, setOpenCompose, isBelowSmScreen, isBelowMdScreen, setMailComposedStatus, emailPermission } = props;
     const { settings } = useSettings();
     const [to, setTo] = useState('');
     const [subject, setSubject] = useState('');
-    const [visibility, setVisibility] = useState({ cc: false, bcc: false });
     const [apiErrors, setApiErrors] = useState({});
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [recipientType, setRecipientType] = useState('single-user');
-
-    const toggleVisibility = value => {
-        setVisibility(prev => ({ ...prev, [value]: !prev[value] }));
-    };
+    const [selectedTemplate, setSelectedTemplate] = useState('');
+    const [templates, setTemplates] = useState();
+    const [templateId, setTemplateId] = useState();
+    const [templateCategory, setTemplateCategory] = useState();
 
     const editor = useEditor({
         extensions: [
@@ -139,18 +141,52 @@ const ComposeMail = props => {
         immediatelyRender: false,
     });
 
+    const getTemplates = useCallback(async () => {
+        const response = await apiClient.post("/api/email/template/get-templates", {});
+        if (response.data.result === true) {
+            setTemplates(response.data.message);
+        } else if (response.data.result === false) {
+            if (response?.data?.message?.roleError?.name === responseData.tokenExpired || response?.data?.message?.invalidToken === responseData.invalidToken) {
+                await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL });
+                sessionStorage.removeItem("token");
+            }
+        }
+    }, []);
+
     const handleRecipientTypeChange = (event) => {
         setRecipientType(event.target.value);
     };
 
+    const handleTemplateChange = (event) => {
+        const selectedTemplateId = event.target.value;
+        setSelectedTemplate(selectedTemplateId);
+        if (templates?.length > 0) {
+            const templateContent = templates?.find(template => template.id === selectedTemplateId);
+            if (templateContent && editor) {
+                setTemplateId(templateContent.id);
+                setTemplateCategory(templateContent.category);
+                const maxLineBreaks = 5;
+                const formattedMessage = templateContent.message
+                    .replace(/\n{2,}/g, (match) => {
+                        return '<br/>'.repeat(Math.min(match.length, maxLineBreaks));
+                    })
+                    .replace(/\n/g, '<br />');
+                editor.commands.setContent(formattedMessage);
+            }
+        }
+    };
+
     const handleSend = async () => {
         setIsButtonLoading(true);
+        setMailComposedStatus(false);
         const message = editor.getHTML();
         const postData = {
             to: to ?? '',
             subject: subject ?? '',
             message: message ?? '',
-            sendMailTo: recipientType
+            sendMailTo: recipientType,
+            templateId: templateId ?? null,
+            templateCategory: templateCategory ?? ''
         };
         try {
             const response = await apiClient.post('/api/email', postData);
@@ -159,7 +195,9 @@ const ComposeMail = props => {
                 showToast(true, response.data.message);
                 setIsButtonLoading(false);
                 setOpenCompose(false);
+                setMailComposedStatus(true);
             } else if (response.data.result === false) {
+                setMailComposedStatus(false);
                 if (response?.data?.message?.roleError?.name === responseData.tokenExpired || response?.data?.message?.invalidToken === responseData.invalidToken) {
                     await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL });
                     sessionStorage.removeItem("token");
@@ -174,6 +212,7 @@ const ComposeMail = props => {
                 }
             }
         } catch (error) {
+            setMailComposedStatus(false);
             console.error('Error sending email:', error);
         }
     };
@@ -182,12 +221,17 @@ const ComposeMail = props => {
         if (openCompose === true) {
             setTo('');
             setSubject('');
+            setSelectedTemplate('');
             if (editor) {
                 editor.commands.clearContent();
             }
             setApiErrors({});
         }
     }, [openCompose, editor])
+
+    useEffect(() => {
+        getTemplates();
+    }, [getTemplates]);
 
     return (
         <Drawer
@@ -240,6 +284,53 @@ const ComposeMail = props => {
                 </FormControl>
             </div>
 
+            {/* Choose template */}
+            <div>
+                <FormControl fullWidth>
+                    <Select
+                        value={selectedTemplate}
+                        onChange={handleTemplateChange}
+                        displayEmpty
+                        sx={{
+                            height: '40px',
+                            backgroundColor: '#f2f3f3',
+                            color: '#333',
+                            borderRadius: '0px',
+                            boxShadow: 'none',
+                            padding: '10px 10px 10px 7px',
+                            '&:hover': {
+                                borderColor: 'transparent',
+                            },
+                            '&:focus': {
+                                borderColor: 'transparent',
+                                outline: 'none',
+                                boxShadow: 'none',
+                            },
+                            '& .MuiSelect-select': {
+                                // padding: '10px 10px 10px 24px',
+                            },
+                            '& .MuiSelect-icon': {
+                                right: '8px',
+                            },
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                border: 'none',
+                            },
+                        }}
+                        inputProps={{
+                            // disableUnderline: true,
+                        }}
+                    >
+                        <MenuItem value="" disabled>Select a template</MenuItem>
+                        {
+                            templates?.map(template => (
+                                <MenuItem key={template.id} value={template.id}>
+                                    {template.category}
+                                </MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
+            </div>
 
 
             {/* Conditionally display "To" input field */}
@@ -264,14 +355,16 @@ const ComposeMail = props => {
             <EditorContent editor={editor} className='bs-[105px] overflow-y-auto flex border-bs' />
 
             <div className='plb-4 pli-6 flex justify-between items-center gap-4'>
-                <div className='flex items-center gap-4 max-sm:gap-3'>
-                    {isBelowSmScreen ? (
-                        <CustomIconButton color='primary' variant='contained' onClick={handleSend}><i className='bx-send' /></CustomIconButton>
-                    ) : (
-                        <Button variant='contained' endIcon={isButtonLoading ? '' : <i className='bx-send' />} onClick={handleSend} disabled={isButtonLoading}>{isButtonLoading ? <Loader type="btnLoader" /> : 'Send'}</Button>
-                    )}
-                    {/* <IconButton size='small'><i className='bx-paperclip text-textSecondary' /></IconButton> */}
-                </div>
+                {((emailPermission?.editPermission === "Y" || emailPermission?.writePermission === "Y")) && (
+                    <div className='flex items-center gap-4 max-sm:gap-3'>
+                        {isBelowSmScreen ? (
+                            <CustomIconButton color='primary' variant='contained' onClick={handleSend}><i className='bx-send' /></CustomIconButton>
+                        ) : (
+                            <Button variant='contained' endIcon={isButtonLoading ? '' : <i className='bx-send' />} onClick={handleSend} disabled={isButtonLoading}>{isButtonLoading ? <Loader type="btnLoader" /> : 'Send'}</Button>
+                        )}
+                        {/* <IconButton size='small'><i className='bx-paperclip text-textSecondary' /></IconButton> */}
+                    </div>
+                )}
                 {/* <div className='flex gap-2'>
                     <IconButton size='small'><i className='bx-dots-vertical-rounded text-textSecondary' /></IconButton>
                     <IconButton size='small' onClick={() => setOpenCompose(false)}><i className='bx-trash text-textSecondary' /></IconButton>
@@ -280,5 +373,14 @@ const ComposeMail = props => {
         </Drawer>
     );
 };
+
+ComposeMail.propTypes = {
+    openCompose: PropTypes.any,
+    setOpenCompose: PropTypes.any,
+    isBelowSmScreen: PropTypes.any,
+    isBelowMdScreen: PropTypes.any,
+    setMailComposedStatus: PropTypes.bool,
+    emailPermission: PropTypes.any
+}
 
 export default ComposeMail;

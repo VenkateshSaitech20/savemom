@@ -14,51 +14,7 @@ import frontCommonStyles from '@views/front-pages/styles.module.css';
 import apiClient from '@/utils/apiClient';
 import Loader from '@/components/loader';
 
-// const pricingPlans = [
-//   {
-//     title: 'Basic',
-//     img: '/images/front-pages/landing-page/pricing-basic.png',
-//     monthlyPay: 19,
-//     annualPay: 14,
-//     perYearPay: 168,
-//     features: ['Timeline', 'Basic search', 'Live chat widget', 'Email marketing', 'Custom Forms', 'Traffic analytics'],
-//     current: false
-//   },
-//   {
-//     title: 'Team',
-//     img: '/images/front-pages/landing-page/pricing-team.png',
-//     monthlyPay: 29,
-//     annualPay: 22,
-//     perYearPay: 264,
-//     features: [
-//       'Everything in basic',
-//       'Timeline with database',
-//       'Advanced search',
-//       'Marketing automation',
-//       'Advanced chatbot',
-//       'Campaign management'
-//     ],
-//     current: true
-//   },
-//   {
-//     title: 'Enterprise',
-//     img: '/images/front-pages/landing-page/pricing-enterprise.png',
-//     monthlyPay: 49,
-//     annualPay: 37,
-//     perYearPay: 444,
-//     features: [
-//       'Campaign management',
-//       'Timeline with database',
-//       'Fuzzy search',
-//       'A/B testing sanbox',
-//       'Custom permissions',
-//       'Social media automation'
-//     ],
-//     current: false
-//   }
-// ]
-
-const PricingPlan = () => {
+const PricingPlan = ({ data }) => {
   const [pricingPlan, setPricingPlan] = useState('annually');
   const [planList, setPlanList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,23 +50,20 @@ const PricingPlan = () => {
         >
           <div className={classnames('is-full', frontCommonStyles.layoutSpacing)}>
             <div className='flex flex-col items-center justify-center gap-4 mbe-4'>
-              <Chip size='small' variant='tonal' color='primary' label='Pricing Plans' />
+              <Chip size='small' variant='tonal' color='primary' label={data?.badgeTitle} />
               <div className='flex flex-wrap flex-col items-center justify-center gap-1 text-center'>
                 <Typography variant='h4'>
                   <span className='relative z-[1] font-extrabold'>
-                    Tailored pricing plans
+                    {data?.title}
                     <img
                       src='/images/front-pages/landing-page/bg-shape.png'
                       alt='bg-shape'
                       className='absolute block-end-0 z-[1] bs-[40%] is-[125%] sm:is-[132%] -inline-start-[10%] sm:inline-start-[-19%] block-start-[17px]'
                     />
-                  </span>{' '}
-                  designed for you
+                  </span>
                 </Typography>
                 <Typography>
-                  All plans include 40+ advanced tools and features to boost your product.
-                  <br />
-                  Choose the best plan to fit your needs.
+                  {data?.description}
                 </Typography>
               </div>
             </div>
@@ -124,7 +77,7 @@ const PricingPlan = () => {
               </InputLabel>
               <div className='flex gap-x-1 items-start max-sm:hidden mbe-5'>
                 <img src='/images/front-pages/landing-page/pricing-arrow.png' alt='arrow image' width='50' />
-                <Typography className='font-medium'>Save 25%</Typography>
+                <Typography className='font-medium'>Save {data?.discount}%</Typography>
               </div>
             </div>
             <Grid container spacing={6}>

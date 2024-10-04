@@ -23,7 +23,8 @@ const MailContent = props => {
     isBelowLgScreen,
     isBelowMdScreen,
     isBelowSmScreen,
-    setBackdropOpen
+    setBackdropOpen,
+    mailComposedStatus
   } = props
 
   // States
@@ -33,7 +34,6 @@ const MailContent = props => {
   const [searchTerm, setSearchTerm] = useState('')
   const [currentEmail, setCurrentEmail] = useState(null);
 
-  console.log("currentEmail:", currentEmail);
   // Vars
   const emails = store.filteredEmails
   // const currentEmailStatic = emails.find(email => email.id === store.currentEmailId)
@@ -114,6 +114,7 @@ const MailContent = props => {
         handleSingleEmailDelete={handleSingleEmailDelete}
         handleToggleIsReadStatus={handleToggleIsReadStatus}
         setCurrentEmail={setCurrentEmail}
+        mailComposedStatus={mailComposedStatus}
       />
       {
         currentEmail &&

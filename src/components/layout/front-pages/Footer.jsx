@@ -14,22 +14,26 @@ import frontCommonStyles from '@views/front-pages/styles.module.css';
 import apiClient from '@/utils/apiClient';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+import Loader from '@/components/loader';
 
 const Footer = () => {
   const [apiErrors, setApiErrors] = useState({});
   const [successMsg, setSuccessMsg] = useState('');
   const { reset, register, watch } = useForm({});
+  const [isLoading, setIsLoading] = useState(false);
   const email = watch('email');
 
   const handleSubscribe = async () => {
     setApiErrors({});
-    if (!email) return
+    setIsLoading(true);
     setSuccessMsg('');
     const response = await apiClient.post('/api/subscribers', { email });
     if (response?.data?.result) {
+      setIsLoading(false);
       setSuccessMsg(response?.data?.message);
-      reset();
+      reset({ email: '' });
     } else {
+      setIsLoading(false);
       setApiErrors(response?.data?.message);
     }
   };
@@ -73,8 +77,9 @@ const Footer = () => {
                     color='primary'
                     sx={{ borderStartStartRadius: 0, borderEndStartRadius: 0 }}
                     onClick={handleSubscribe}
+                    disabled={isLoading}
                   >
-                    Subscribe
+                    {isLoading ? <Loader type="btnLoader" /> : "Subscribe"}
                   </Button>
                 </div>
               </div>

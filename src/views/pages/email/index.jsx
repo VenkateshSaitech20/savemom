@@ -21,6 +21,7 @@ const EmailPage = ({ tabContentList }) => {
                     <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
                         <Tab label='Channel' value='channel' />
                         <Tab label='Setting' value='setting' />
+                        <Tab label='Templates' value='template' />
                     </CustomTabList>
                 </Grid>
                 <Grid item xs={12}>
