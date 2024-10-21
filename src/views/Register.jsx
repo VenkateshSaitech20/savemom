@@ -19,6 +19,7 @@ import TextFieldStyled from '@core/components/mui/TextField';
 import { getLocalizedUrl } from '@/utils/i18n';
 import { registerData, validations } from './../utils/message';
 import CustomInputLabel from '@/components/asterick';
+import Loader from '@/components/loader';
 
 const RegisterIllustration = styled('img')(({ theme }) => ({
 	zIndex: 2,
@@ -36,6 +37,7 @@ const RegisterIllustration = styled('img')(({ theme }) => ({
 
 const Register = () => {
 	const [isPasswordShown, setIsPasswordShown] = useState(false);
+	const [isButtonLoading, setIsButtonLoading] = useState(false);
 	const [apiErrors, setApiErrors] = useState({});
 	const { register, handleSubmit, formState: { errors }, control } = useForm({ defaultValues: { termsAgreed: false } });
 	const { lang: locale } = useParams()
@@ -44,12 +46,16 @@ const Register = () => {
 	const router = useRouter();
 
 	const handleUserRegister = async (data) => {
+		setIsButtonLoading(true);
 		const response = await axios.post('/api/register', data, {});
 		if (response.data.result === true) {
+			setIsButtonLoading(false);
 			router.push('/en/login');
 		} else {
+			setIsButtonLoading(false);
 			setApiErrors(response?.data?.message)
 		}
+		setIsButtonLoading(false);
 	};
 
 	return (
@@ -150,7 +156,7 @@ const Register = () => {
 							<FormHelperText className="text-red-500">{errors.termsAgreed.message}</FormHelperText>
 						)}
 						<Button fullWidth variant='contained' type='submit'>
-							Sign Up
+							{isButtonLoading ? <Loader type="btnLoader" /> : 'Sign Up'}
 						</Button>
 						<div className='flex justify-center items-center flex-wrap gap-2'>
 							<Typography>Already have an account?</Typography>

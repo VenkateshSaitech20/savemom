@@ -21,7 +21,7 @@ const AddCountry = props => {
     const [apiErrors, setApiErrors] = useState({});
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const { register, handleSubmit, formState: { errors }, control, reset } = useForm();
-    const { websiteSettingsPermission } = SubUserPermission();
+    const { masterSettingsPermission } = SubUserPermission();
     const handleReset = () => {
         handleClose()
         setApiErrors({});
@@ -87,11 +87,11 @@ const AddCountry = props => {
                                     variant='filled'
                                     size={"small"}
                                     InputLabelProps={{ shrink: true }}
-                                    label={<CustomInputLabel htmlFor='sortname' text='Short Name' />}
+                                    label={<CustomInputLabel htmlFor='shortname' text='Short Name' />}
                                     placeholder='Short Name'
-                                    error={!!errors.sortname || apiErrors?.sortname}
-                                    helperText={errors?.sortname?.message || apiErrors?.sortname}
-                                    {...register('sortname', { required: registerData.sortnameReq, validate: value => value.trim() !== '' || registerData.sortnameReq })}
+                                    error={!!errors.shortname || apiErrors?.shortname}
+                                    helperText={errors?.shortname?.message || apiErrors?.shortname}
+                                    {...register('shortname', { required: registerData.shortnameReq, validate: value => value.trim() !== '' || registerData.shortnameReq })}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -135,7 +135,7 @@ const AddCountry = props => {
                                 />
                             </Grid>
                             <Grid item xs={12} className='flex gap-4 flex-wrap'>
-                                {(websiteSettingsPermission?.editPermission === "Y" || websiteSettingsPermission?.writePermission === "Y") && (
+                                {(masterSettingsPermission?.editPermission === "Y" || masterSettingsPermission?.writePermission === "Y") && (
                                     <Button variant='contained' type='submit'>
                                         {isButtonLoading ? <Loader type="btnLoader" /> : "Add Country"}
                                     </Button>

@@ -16,6 +16,7 @@ import PropTypes from "prop-types";
 import Loader from '@/components/loader';
 import apiClient from '@/utils/apiClient';
 import CustomInputLabel from '@/components/asterick';
+import { Typography } from '@mui/material';
 
 const EditPaymentGatewayInfo = ({ open, setOpen, data, id, handleGatewayUpdate, showToast }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -70,9 +71,10 @@ const EditPaymentGatewayInfo = ({ open, setOpen, data, id, handleGatewayUpdate, 
             <DialogCloseButton onClick={() => setOpen(false)} disableRipple>
                 <i className='bx-x' />
             </DialogCloseButton>
-            <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-6 sm:pli-16'>
+            <DialogTitle variant='h4' className='flex gap-2 flex-col text-center sm:pbs-16 sm:pbe-3 sm:pli-16'>
                 Edit Configure Subscription
             </DialogTitle>
+            <Typography variant='h6' className='text-warning text-center mb-2'>{registerData.packageConfigValMsg}</Typography>
             <form onSubmit={handleSubmit(handleUpdateUserData)} autoComplete='off'>
                 <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
                     <Grid container spacing={5}>

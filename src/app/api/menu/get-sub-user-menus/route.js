@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { responseData } from '@/utils/message';
 import { extractTokenData } from '@/utils/helper';
-import { deleteFields } from '../../api-utlis/helper';
 const prisma = new PrismaClient();
 
 export async function POST(req) {

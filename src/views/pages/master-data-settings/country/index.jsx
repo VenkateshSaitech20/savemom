@@ -4,11 +4,11 @@ import CountryTable from './CountryTable';
 import SubUserPermission from '@/utils/SubUserPermission';
 
 const Country = () => {
-    const { websiteSettingsPermission } = SubUserPermission();
+    const { masterSettingsPermission } = SubUserPermission();
     return (
         <Grid container spacing={6}>
             <Grid item xs={12}>
-                <CountryTable websiteSettingsPermission={websiteSettingsPermission} />
+                <CountryTable masterSettingsPermission={masterSettingsPermission} />
             </Grid>
         </Grid>
     )

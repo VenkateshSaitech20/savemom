@@ -45,7 +45,6 @@ export async function POST(req) {
                 country: true,
             }
         });
-        console.log("users", users); // Log user data to ensure it is correct
         const worksheetData = [
             ['Name', 'Email', 'Phone Number', 'Role Name', 'Address', 'State', 'Country'],
             ...users.map(user => [

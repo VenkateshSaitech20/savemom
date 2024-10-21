@@ -6,7 +6,7 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import TextFieldStyled from '@core/components/mui/TextField';
 import { useForm, Controller } from 'react-hook-form';
-import { emailType, registerData, responseData, validations } from '@/utils/message';
+import { emailCompany, emailType, registerData, responseData, validations } from '@/utils/message';
 import Loader from '@/components/loader';
 import apiClient from '@/utils/apiClient';
 import { showToast } from '@/utils/helper';
@@ -36,6 +36,7 @@ const EmailSetting = () => {
             setIsButtonLoading(true);
             showToast(true, response.data.message);
             setApiErrors({});
+            getEmailSetting();
             setIsButtonLoading(false);
         } else if (response.data.result === false) {
             if (response?.data?.message?.roleError?.name === responseData.tokenExpired || response?.data?.message?.invalidToken === responseData.invalidToken) {
@@ -76,6 +77,34 @@ const EmailSetting = () => {
                 <CardContent>
                     <form autoComplete='off' onSubmit={handleSubmit(handleOnSubmit)}>
                         <Grid container spacing={6}>
+                            <Grid item xs={12} sm={6}>
+                                <Controller
+                                    name='emailCompany'
+                                    control={control}
+                                    rules={{ required: registerData.emailCompanyReq }}
+                                    defaultValue=''
+                                    render={({ field }) => (
+                                        <TextFieldStyled
+                                            select
+                                            fullWidth
+                                            variant='filled'
+                                            InputLabelProps={{ shrink: true }}
+                                            size={"small"}
+                                            id='email-company'
+                                            label={<CustomInputLabel htmlFor='email-company' text='Email Company' />}
+                                            {...field}
+                                            error={Boolean(errors?.emailCompany) || !!apiErrors?.emailCompany}
+                                            helperText={errors?.emailCompany?.message || apiErrors?.emailCompany}
+                                        >
+                                            {emailCompany?.map(type => (
+                                                <MenuItem value={type?.value} key={type?.id}>
+                                                    {type?.name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextFieldStyled>
+                                    )}
+                                />
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                                 <Controller
                                     name='emailType'
@@ -126,13 +155,26 @@ const EmailSetting = () => {
                             <Grid item xs={12} sm={6}>
                                 <TextFieldStyled
                                     fullWidth
-                                    label={<CustomInputLabel htmlFor='password' text='Password' />}
+                                    label="API Key"
+                                    variant='filled'
+                                    InputLabelProps={{ shrink: true }}
+                                    size={"small"}
+                                    placeholder='Enter your API Key'
+                                    {...register('apiKey')}
+                                    error={!!errors?.apiKey || !!apiErrors?.apiKey}
+                                    helperText={errors?.apiKey?.message || apiErrors?.apiKey}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextFieldStyled
+                                    fullWidth
+                                    label="Password"
                                     variant='filled'
                                     size={"small"}
                                     InputLabelProps={{ shrink: true }}
                                     placeholder='············'
                                     type={isPasswordShown ? 'text' : 'password'}
-                                    {...register('password', { required: registerData.passwordReq, validate: value => value.trim() !== '' || registerData.passwordReq })}
+                                    {...register('password')}
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position='end'>

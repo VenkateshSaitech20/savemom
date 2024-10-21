@@ -29,7 +29,7 @@ import PropTypes from 'prop-types'
 // Constants
 const icons = {
     // inbox: 'bx-envelope',
-    sent: 'bx-send',
+    // sent: 'bx-send',
     // draft: 'bx-edit',
     // starred: 'bx-star',
     // spam: 'bx-error-alt',

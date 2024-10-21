@@ -9,7 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import TextFieldStyled from '@core/components/mui/TextField';
 import { Controller, useForm } from 'react-hook-form';
-import { countryData, otherData, registerData, responseData, validations } from '@/utils/message';
+import { otherData, registerData, responseData, validations } from '@/utils/message';
 import Loader from '@/components/loader';
 import apiClient from '@/utils/apiClient';
 import { base64ToFile, showToast } from '@/utils/helper';
@@ -24,14 +24,16 @@ const AccountDetails = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [imgSrc, setImgSrc] = useState('');
-    // const { data: session, update } = useSession();
+    const [countryData, setCountryData] = useState([]);
+    const [stateData, setStateData] = useState([]);
+    const [isStateDisabled, setIsStateDisabled] = useState(true);
+    const [selectedCountry, setSelectedCountry] = useState('');
     const { register, handleSubmit, formState: { errors }, control, setValue } = useForm();
     const defaultImage = '/images/avatars/1.png';
     const invalidImg = '/images/misc/invalid-files.jpg';
     const allowedFileTypes = process.env.NEXT_PUBLIC_ALLOWED_FILE_TYPES.split(',');
     const fileLimit = `${otherData?.fileLimitText} (${otherData?.profileImgDim})`;
     const { accountSettingsPermission } = SubUserPermission();
-
     const handleFileInputChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -50,7 +52,6 @@ const AccountDetails = () => {
             }
         }
     };
-
     const handleProfileEdit = async (data) => {
         if (apiErrors.profileImage) {
             return;
@@ -84,28 +85,58 @@ const AccountDetails = () => {
             setIsButtonLoading(false);
         }
     };
-
     const getUserProfile = async () => {
         setIsLoading(true);
         const response = await apiClient.get(`/api/profile`);
         if (response.data.result === true) {
-            const { name, email, companyName, contactNo, address, state, zipCode, country, image } = response.data.message;
+            const { name, email, companyName, contactNo, address, stateId, zipCode, countryId, image } = response.data.message;
             setValue('name', name);
             setValue('email', email);
             setValue('companyName', companyName);
             setValue('contactNo', contactNo);
             setValue('address', address);
-            setValue('state', state);
+            setValue('stateId', stateId);
             setValue('zipCode', zipCode);
-            setValue('country', country);
+            setValue('countryId', countryId);
+            setSelectedCountry(countryId);
             setImgSrc(image);
         }
         setIsLoading(false);
     };
+    const getCountries = async () => {
+        const response = await apiClient.get("/api/master-data-settings/country");
+        if (response.data.result === true) {
+            setCountryData(response.data.message);
+        } else if (response.data.result === false) {
+            if (response?.data?.message?.roleError?.name === responseData.tokenExpired || response?.data?.message?.invalidToken === responseData.invalidToken) {
+                await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL });
+                sessionStorage.removeItem("token");
+            }
+        }
+    };
     useEffect(() => {
         getUserProfile();
+        getCountries();
     }, []);
-
+    useEffect(() => {
+        if (selectedCountry) {
+            fetchStatesByCountryId(selectedCountry);
+        } else {
+            setStateData([]);
+            setIsStateDisabled(true);
+        }
+    }, [selectedCountry]);
+    const fetchStatesByCountryId = async (selectedCountry) => {
+        try {
+            const response = await apiClient.post('/api/master-data-settings/state/get-by-country-id', { countryId: selectedCountry });
+            if (response.data.result === true) {
+                setStateData(response.data.message);
+                setIsStateDisabled(false);
+            }
+        } catch (error) {
+            console.error('Failed to fetch states:', error);
+        }
+    };
     return (
         <Card>
             {isLoading && <div className='my-4'><Loader /></div>}
@@ -118,16 +149,7 @@ const AccountDetails = () => {
                                 <div className='flex flex-grow flex-col gap-4'>
                                     <div className='flex flex-col sm:flex-row gap-4'>
                                         <FormControl>
-                                            <Button component='label' variant='contained' htmlFor='account-settings-upload-image' sx={{ position: 'relative', overflow: 'hidden' }}>
-                                                Upload New Photo
-                                                <input
-                                                    hidden
-                                                    type='file'
-                                                    // value={fileInput}
-                                                    accept='image/png, image/jpeg'
-                                                    onChange={handleFileInputChange}
-                                                    id='account-settings-upload-image'
-                                                />
+                                            <Button component='label' variant='contained' htmlFor='account-settings-upload-image' sx={{ position: 'relative', overflow: 'hidden' }}> Upload New Photo <input hidden type='file' accept='image/png, image/jpeg' onChange={handleFileInputChange} id='account-settings-upload-image' />
                                             </Button>
                                             {apiErrors?.profileImage && (
                                                 <FormHelperText className='text-red-500'>
@@ -196,10 +218,75 @@ const AccountDetails = () => {
                                         size={"small"}
                                         InputLabelProps={{ shrink: true }}
                                         label='Phone Number'
-                                        placeholder='+91 9876543210'
+                                        placeholder='9876543210'
                                         {...register("contactNo")}
                                         error={!!apiErrors?.contactNo}
                                         helperText={apiErrors?.contactNo}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Controller
+                                        name='countryId'
+                                        control={control}
+                                        defaultValue=''
+                                        render={({ field }) => (
+                                            <TextFieldStyled
+                                                select
+                                                fullWidth
+                                                id='select-country'
+                                                label='Select Country'
+                                                size="small"
+                                                variant='filled'
+                                                InputLabelProps={{ shrink: true }}
+                                                {...field}
+                                                error={!!apiErrors?.countryId}
+                                                helperText={apiErrors?.countryId}
+                                                onChange={(event) => {
+                                                    setSelectedCountry(event.target.value);
+                                                    field.onChange(event);
+                                                }}
+                                            >
+                                                <MenuItem value='' disabled>
+                                                    Select a country
+                                                </MenuItem>
+                                                {countryData?.map((country) => (
+                                                    <MenuItem value={country.id} key={country.id}>
+                                                        {country.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextFieldStyled>
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Controller
+                                        name='stateId'
+                                        control={control}
+                                        defaultValue=''
+                                        render={({ field }) => (
+                                            <TextFieldStyled
+                                                select
+                                                fullWidth
+                                                id='select-state'
+                                                label='Select State'
+                                                size="small"
+                                                variant='filled'
+                                                InputLabelProps={{ shrink: true }}
+                                                {...field}
+                                                error={!!apiErrors?.stateId}
+                                                helperText={apiErrors?.stateId}
+                                                disabled={isStateDisabled}
+                                            >
+                                                <MenuItem value='' disabled>
+                                                    Select a state
+                                                </MenuItem>
+                                                {stateData?.map((state) => (
+                                                    <MenuItem value={state.id} key={state.id}>
+                                                        {state.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextFieldStyled>
+                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
@@ -221,54 +308,11 @@ const AccountDetails = () => {
                                         variant='filled'
                                         size={"small"}
                                         InputLabelProps={{ shrink: true }}
-                                        label='State'
-                                        placeholder='New York'
-                                        {...register('state')}
-                                        error={!!apiErrors?.state}
-                                        helperText={apiErrors?.state}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextFieldStyled
-                                        fullWidth
-                                        variant='filled'
-                                        size={"small"}
-                                        InputLabelProps={{ shrink: true }}
                                         label='Zip Code'
                                         placeholder='123456'
                                         {...register('zipCode')}
                                         error={!!apiErrors?.zipCode}
                                         helperText={apiErrors?.zipCode}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Controller
-                                        name='country'
-                                        control={control}
-                                        defaultValue=''
-                                        render={({ field }) => (
-                                            <TextFieldStyled
-                                                select
-                                                fullWidth
-                                                id='select-country'
-                                                label='Select Country'
-                                                size="small"
-                                                variant='filled'
-                                                InputLabelProps={{ shrink: true }}
-                                                {...field}
-                                                error={!!apiErrors?.country}
-                                                helperText={apiErrors?.country}
-                                            >
-                                                <MenuItem value='' disabled>
-                                                    Select a country
-                                                </MenuItem>
-                                                {countryData?.map((country) => (
-                                                    <MenuItem value={country.name} key={country.id}>
-                                                        {country.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextFieldStyled>
-                                        )}
                                     />
                                 </Grid>
                                 <Grid item xs={12} className='flex gap-4 flex-wrap'>

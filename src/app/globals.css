@@ -140,3 +140,34 @@ code {
     @apply max-sm:is-full min-is-[220px];
   }
 }
+
+.cardSpaceBetween {
+  justify-content: space-between;
+}
+
+.flexCenterColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dashCntSize {
+  margin-bottom: 5px;
+  font-size: 28px !important;
+}
+
+.imgDiv {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.dashImgSize {
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  left: 200px !important;
+  bottom: 24px !important;
+}

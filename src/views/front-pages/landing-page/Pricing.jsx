@@ -13,12 +13,17 @@ import CustomAvatar from '@core/components/mui/Avatar';
 import frontCommonStyles from '@views/front-pages/styles.module.css';
 import apiClient from '@/utils/apiClient';
 import Loader from '@/components/loader';
+import { getLocalizedUrl } from '@/utils/i18n';
+import { useParams, useRouter } from 'next/navigation';
+import PropTypes from "prop-types";
 
 const PricingPlan = ({ data }) => {
   const [pricingPlan, setPricingPlan] = useState('annually');
   const [planList, setPlanList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
+  // const { lang: locale } = useParams();
+  const locale = 'en';
   const getData = useCallback(async () => {
     setIsLoading(true);
     const response = await apiClient.get('/api/website-settings/package-plans');
@@ -38,7 +43,7 @@ const PricingPlan = ({ data }) => {
     } else {
       setPricingPlan('monthly')
     }
-  }
+  };
 
   return (
     <>
@@ -109,7 +114,7 @@ const PricingPlan = ({ data }) => {
                       <div>
                         <div className='flex flex-col gap-3'>
                           {plan.planBenefits.map((plan) => (
-                            <div key={plan.id} className='flex items-center gap-2.5'>
+                            <div key={plan} className='flex items-center gap-2.5'>
                               {/* <CustomAvatar color='primary' skin={plan.current ? 'filled' : 'light'} size={16}> */}
                               <CustomAvatar color='primary' skin={'light'} size={16}>
                                 <i className='bx-check text-xs' />
@@ -120,7 +125,8 @@ const PricingPlan = ({ data }) => {
                         </div>
                       </div>
                       {/* <Button component={Link} href='/front-pages/payment' variant={plan.current ? 'contained' : 'tonal'}> */}
-                      <Button component={Link} href='/front-pages/payment' variant={'contained'}>
+                      <Button component={Link} href={getLocalizedUrl('/pages/my-plan', locale)} variant={plan.current ? 'contained' : 'tonal'}>
+                        {/* <Button onClick={handleButtonClick} variant={'contained'}> */}
                         Get Started
                       </Button>
                     </CardContent>
@@ -136,4 +142,7 @@ const PricingPlan = ({ data }) => {
   )
 }
 
+PricingPlan.propTypes = {
+  data: PropTypes.any,
+};
 export default PricingPlan

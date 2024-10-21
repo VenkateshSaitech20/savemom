@@ -12,6 +12,14 @@ const baseDir = `${process.env.MAIN_FOLDER_PATH}`;
 // Get all plans
 export async function GET() {
     try {
+        const token = extractTokenData(req.headers);
+        if (!token) {
+            return NextResponse.json({ result: false, message: { tokenExpired: responseData.tokenExpired } });
+        }
+        const user = await prisma.user.findUnique({ where: { id: token.id, isDeleted: "N" } });
+        if (!user) {
+            return NextResponse.json({ result: false, message: { userNotFound: responseData.userNotFound } });
+        }
         const pricingDetails = await prisma.package_plans.findMany({ where: { isDeleted: "N" }, orderBy: { monthlyPrice: 'asc' } });
         if (pricingDetails) {
             deleteFields(pricingDetails, ['createdAt', 'updatedAt']);
@@ -39,11 +47,10 @@ export async function POST(req) {
         }
         if (user?.id) { userId = user.id }
         const formData = await req.formData();
-
         for (const [key, value] of formData.entries()) {
             fields[key] = value;
         };
-        const { title, subTitle, planBenefits } = fields;
+        const { title, subTitle, planBenefits, id } = fields;
 
         const emptyFieldErrors = {};
         if (!title || title?.trim() === "") {
@@ -70,6 +77,16 @@ export async function POST(req) {
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
         };
+        let existsErrors = {};
+        // const existsTitle = await prisma.package_plans.findFirst({ where: { id: { not: id }, title: title, isDeleted: "N" } });
+        const existsTitle = await prisma.package_plans.findFirst({ where: { id: { not: id }, title: title, isDeleted: "N" } });
+        console.log('existsTitle', existsTitle)
+        if (existsTitle && existsTitle != "") {
+            existsErrors.title = responseData.titleExists;
+        }
+        if (Object.keys(existsErrors).length > 0) {
+            return NextResponse.json({ result: false, message: existsErrors });
+        }
         const image = formData.get('image');
         const files = { image };
         const { profileImageUrls, errors } = await processFiles(files, uploadDir, urlDir);
@@ -78,11 +95,11 @@ export async function POST(req) {
         };
         const monthlyPrice = parseFloat(fields.monthlyPrice);
         const discountMultiplier = 1 - (discount / 100);
-        const discountedMonthlyPrice = (monthlyPrice * discountMultiplier).toFixed(2);
-        const discountedAnnualPrice = (discountedMonthlyPrice * 12).toFixed(2);
+        const discountedMonthlyPrice = monthlyPrice * discountMultiplier;
+        const discountedAnnualPrice = discountedMonthlyPrice * 12;
         fields.yearlyPlan = JSON.stringify({
-            monthly: discountedMonthlyPrice,
-            annually: discountedAnnualPrice
+            monthly: Math.round(discountedMonthlyPrice),
+            annually: Math.round(discountedAnnualPrice)
         });
         const data = { ...fields, yearlyPlan: JSON.parse(fields.yearlyPlan), planBenefits: JSON.parse(fields.planBenefits), ...profileImageUrls }
         if (fields.id) {
@@ -107,6 +124,7 @@ export async function POST(req) {
             })
             return NextResponse.json({ result: true, message: updatedPackage });
         } else {
+            data.createdUser = userId;
             await prisma.package_plans.create({ data });
             return NextResponse.json({ result: true, message: responseData.dataCreateded });
         }

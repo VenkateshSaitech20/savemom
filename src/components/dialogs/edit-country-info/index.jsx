@@ -38,7 +38,7 @@ const CountryDialog = ({ open, setOpen, data, id, handleCountryUpdate }) => {
         if (countryData) {
             reset({
                 name: countryData?.name || '',
-                sortname: countryData?.sortname || '',
+                shortname: countryData?.shortname || '',
                 phoneCode: countryData?.phoneCode || '',
                 isActive: countryData?.isActive || '',
             });
@@ -106,9 +106,9 @@ const CountryDialog = ({ open, setOpen, data, id, handleCountryUpdate }) => {
                                 InputLabelProps={{ shrink: true }}
                                 variant='filled'
                                 size={"small"}
-                                {...register('sortname')}
-                                error={Boolean(errors?.sortname) || !!apiErrors?.sortname}
-                                helperText={errors?.sortname?.message || apiErrors?.sortname}
+                                {...register('shortname')}
+                                error={Boolean(errors?.shortname) || !!apiErrors?.shortname}
+                                helperText={errors?.shortname?.message || apiErrors?.shortname}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -174,5 +174,4 @@ CountryDialog.propTypes = {
     handleCountryUpdate: PropTypes.any,
     showToast: PropTypes.any,
 };
-
 export default CountryDialog

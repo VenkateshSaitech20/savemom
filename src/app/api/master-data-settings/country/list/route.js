@@ -22,7 +22,7 @@ export async function POST(req) {
                 ...(searchText ? [{
                     OR: [
                         { name: { contains: searchText } },
-                        { sortname: { contains: searchText } },
+                        { shortname: { contains: searchText } },
                         { phoneCode: { contains: searchText } }
                     ]
                 }] : [])
@@ -42,7 +42,7 @@ export async function POST(req) {
             select: {
                 id: true,
                 name: true,
-                sortname: true,
+                shortname: true,
                 phoneCode: true,
                 isActive: true,
             },

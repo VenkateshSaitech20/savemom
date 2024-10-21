@@ -1,7 +1,14 @@
 import { utils, write } from 'xlsx';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 export async function POST(req) {
     try {
         const { fileType } = await req.json();
+        const queryFilter = {
+            AND: [
+                { isDeleted: 'N' },
+            ]
+        };
         if (fileType === "users") {
             const worksheetData = [
                 ['name', 'email', 'password', 'contactNo', 'country', 'companyName']
@@ -17,8 +24,23 @@ export async function POST(req) {
                 }
             });
         } else if (fileType === "countries") {
+            const countries = await prisma.country.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    name: true,
+                    shortname: true,
+                    phoneCode: true,
+                }
+            });
             const worksheetData = [
-                ['name']
+                ['id', 'name', 'shortname', 'phoneCode'],
+                ...countries.map(country => [
+                    country.id,
+                    country.name,
+                    country.shortname,
+                    country.phoneCode
+                ])
             ];
             const worksheet = utils.aoa_to_sheet(worksheetData);
             const workbook = utils.book_new();
@@ -31,8 +53,23 @@ export async function POST(req) {
                 }
             });
         } else if (fileType === "states") {
+            const states = await prisma.state.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    name: true,
+                    countryId: true,
+                    country: true,
+                }
+            });
             const worksheetData = [
-                ['name', 'countryId', 'country']
+                ['id', 'name', 'countryId', 'country'],
+                ...states.map(state => [
+                    state.id,
+                    state.name,
+                    state.countryId,
+                    state.country,
+                ])
             ];
             const worksheet = utils.aoa_to_sheet(worksheetData);
             const workbook = utils.book_new();
@@ -45,8 +82,27 @@ export async function POST(req) {
                 }
             });
         } else if (fileType === "cities") {
+            const cities = await prisma.city.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    name: true,
+                    countryId: true,
+                    country: true,
+                    stateId: true,
+                    state: true,
+                }
+            });
             const worksheetData = [
-                ['name', 'countryId', 'country', 'stateId', 'state']
+                ['id', 'name', 'countryId', 'country', 'stateId', 'state'],
+                ...cities.map(city => [
+                    city.id,
+                    city.name,
+                    city.countryId,
+                    city.country,
+                    city.stateId,
+                    city.state
+                ])
             ];
             const worksheet = utils.aoa_to_sheet(worksheetData);
             const workbook = utils.book_new();
@@ -59,8 +115,31 @@ export async function POST(req) {
                 }
             });
         } else {
+            const districts = await prisma.district.findMany({
+                where: queryFilter,
+                select: {
+                    id: true,
+                    name: true,
+                    countryId: true,
+                    country: true,
+                    stateId: true,
+                    state: true,
+                    cityId: true,
+                    city: true,
+                }
+            });
             const worksheetData = [
-                ['name', 'countryId', 'country', 'stateId', 'state', 'cityId', 'city']
+                ['id', 'name', 'countryId', 'country', 'stateId', 'state', 'cityId', 'city'],
+                ...districts.map(dist => [
+                    dist.id,
+                    dist.name,
+                    dist.countryId,
+                    dist.country,
+                    dist.stateId,
+                    dist.state,
+                    dist.cityId,
+                    dist.city,
+                ])
             ];
             const worksheet = utils.aoa_to_sheet(worksheetData);
             const workbook = utils.book_new();

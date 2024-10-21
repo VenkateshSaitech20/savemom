@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { registerData, responseData } from '@/utils/message';
 import { validateFields } from '../api-utlis/helper';
+import { sendMail } from '../api-utlis/mailService';
 
 const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
@@ -47,6 +48,16 @@ export async function POST(req) {
 		});
 		const createdBy = inserted.id;
 		await prisma.user.update({ where: { id: createdBy }, data: { createdBy } });
+		const getWelcomeMailTemplate = await prisma.mail_templates.findFirst({ where: { templateType: 'welcome-mail' } });
+		if (getWelcomeMailTemplate) {
+			const subject = getWelcomeMailTemplate.subject;
+			const message = getWelcomeMailTemplate.message.replace('{name}', name);
+			try {
+				await sendMail(email, subject, message);
+			} catch (error) {
+				console.log("error:", error);
+			}
+		}
 		return NextResponse.json({ result: true, message: responseData.userCreated });
 	} catch (error) {
 		return NextResponse.json({ error: error.message });

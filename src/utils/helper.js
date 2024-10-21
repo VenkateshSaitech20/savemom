@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { toast } from "react-toastify";
 const jwt = require('jsonwebtoken');
+const moment = require('moment');
 
 // capitalize first letter
 export const capitalizeFirstLetter = (string) => {
@@ -56,4 +57,24 @@ export const isToday = (someDate) => {
     return someDate.getDate() === today.getDate() &&
         someDate.getMonth() === today.getMonth() &&
         someDate.getFullYear() === today.getFullYear();
+};
+
+// Caps String
+export const convertStrToUpper = (str) => {
+    if (!str) return '';
+    return str
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+export const getDate = (timestamp) => {
+    const date = moment(timestamp);
+    return date.format('DD-MM-YYYY');
+}
+
+export const stripHTML = (html) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
 };

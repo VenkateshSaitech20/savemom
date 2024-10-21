@@ -45,7 +45,7 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
     return itemRank.passed
 };
 const columnHelper = createColumnHelper()
-const CountryTable = ({ websiteSettingsPermission }) => {
+const CountryTable = ({ masterSettingsPermission }) => {
     const [addCountryOpen, setAddCountryOpen] = useState(false)
     const [rowSelection, setRowSelection] = useState({})
     const [data, setData] = useState([]);
@@ -120,8 +120,8 @@ const CountryTable = ({ websiteSettingsPermission }) => {
         getCountries();
     };
     const columns = useMemo(() => {
-        const canDelete = websiteSettingsPermission?.deletePermission === 'Y';
-        const canEdit = websiteSettingsPermission?.editPermission === 'Y';
+        const canDelete = masterSettingsPermission?.deletePermission === 'Y';
+        const canEdit = masterSettingsPermission?.editPermission === 'Y';
         const baseColumns = [
             columnHelper.accessor('name', {
                 header: 'Country',
@@ -134,13 +134,13 @@ const CountryTable = ({ websiteSettingsPermission }) => {
                     </div>
                 )
             }),
-            columnHelper.accessor('sortname', {
+            columnHelper.accessor('shortname', {
                 header: 'Short Name',
                 cell: ({ row }) => (
                     <div className='flex items-center gap-2'>
                         <Icon />
                         <Typography color='text.primary' >
-                            {row.original.sortname}
+                            {row.original.shortname}
                         </Typography>
                     </div>
                 )
@@ -192,7 +192,7 @@ const CountryTable = ({ websiteSettingsPermission }) => {
             );
         }
         return baseColumns;
-    }, [data, filteredData, websiteSettingsPermission]);
+    }, [data, filteredData, masterSettingsPermission]);
     const table = useReactTable({
         data: filteredData,
         columns,
@@ -258,7 +258,7 @@ const CountryTable = ({ websiteSettingsPermission }) => {
                             InputLabelProps={{ shrink: true }}
                             variant='filled'
                         />
-                        {websiteSettingsPermission && websiteSettingsPermission?.writePermission === "Y" && (
+                        {masterSettingsPermission && masterSettingsPermission?.writePermission === "Y" && (
                             <Button
                                 variant='contained'
                                 startIcon={<i className='bx-plus' />}
@@ -338,9 +338,7 @@ const CountryTable = ({ websiteSettingsPermission }) => {
         </>
     )
 }
-
 CountryTable.propTypes = {
-    websiteSettingsPermission: PropTypes.any,
+    masterSettingsPermission: PropTypes.any,
 }
-
 export default CountryTable

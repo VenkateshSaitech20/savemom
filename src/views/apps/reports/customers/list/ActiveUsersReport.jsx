@@ -177,6 +177,7 @@ const ActiveUsersReport = () => {
                     <TextFieldStyled
                         select
                         className='page-drop-size'
+                        variant='filled'
                         value={pageSize}
                         onChange={e => {
                             setPageSize(Number(e.target.value));

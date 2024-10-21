@@ -67,7 +67,8 @@ const AddPayment = props => {
                 </IconButton>
             </div>
             <Divider />
-            <div className='p-6'>
+            <Typography variant='h6' className='pl-6 text-warning mt-3'>{registerData.packageConfigValMsg}</Typography>
+            <div className='p-6 pt-4'>
                 <form onSubmit={handleSubmit(data => onSubmit(data))} className='flex flex-col gap-6' autoComplete='off'>
                     <TextFieldStyled
                         autoFocus

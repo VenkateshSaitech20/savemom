@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import { useForm, Controller } from 'react-hook-form';
 import TextFieldStyled from '@core/components/mui/TextField';
-import { countryData, profileStatus, registerData, responseData, validations } from '@/utils/message';
+import { profileStatus, registerData, responseData, validations } from '@/utils/message';
 import Loader from '@/components/loader';
 import PropTypes from "prop-types";
 import { toast } from 'react-toastify';
@@ -17,11 +17,10 @@ import CustomInputLabel from '@/components/asterick';
 
 const AddUserDrawer = props => {
   const { open, handleClose, onUserAdded } = props;
-
   const [userRoles, setUserRoles] = useState([]);
   const [apiErrors, setApiErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
+  const [countryData, setCountryData] = useState([]);
   // Hooks
   const {
     control,
@@ -30,7 +29,6 @@ const AddUserDrawer = props => {
     formState: { errors },
     register
   } = useForm({})
-
   const getUserRole = async () => {
     const response = await apiClient.post('/api/user-role/get-roles-by-user-id', {})
     if (response.data.result === true) {
@@ -42,11 +40,18 @@ const AddUserDrawer = props => {
       }
     }
   };
-
+  const getCountry = async () => {
+    setIsLoading(true);
+    const response = await apiClient.get('/api/master-data-settings/country');
+    if (response.data.result === true) {
+      setCountryData(response.data.message);
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    getUserRole()
+    getUserRole();
+    getCountry();
   }, []);
-
   const onSubmit = async data => {
     setApiErrors({});
     setIsLoading(true);
@@ -77,14 +82,12 @@ const AddUserDrawer = props => {
     }
     setIsLoading(false);
   };
-
   const handleReset = () => {
     handleClose()
     setIsLoading(false);
     setApiErrors({});
     reset();
   };
-
   return (
     <Drawer
       open={open}
@@ -146,15 +149,15 @@ const AddUserDrawer = props => {
             helperText={errors?.password?.message || apiErrors?.password}
           />
           <TextFieldStyled
-            label='Contact'
+            label={<CustomInputLabel htmlFor='contact' text='Contact' />}
             type='text'
             fullWidth
             variant='filled'
             InputLabelProps={{ shrink: true }}
             placeholder='9857452154'
-            {...register('contactNo')}
-            error={!!apiErrors?.contactNo}
-            helperText={apiErrors?.contactNo}
+            {...register('contactNo', { required: registerData?.phoneReq })}
+            error={!!errors?.contactNo || !!apiErrors?.contactNo}
+            helperText={errors?.contactNo?.message || apiErrors?.contactNo}
           />
           <TextFieldStyled
             autoFocus
@@ -168,7 +171,7 @@ const AddUserDrawer = props => {
             helperText={apiErrors?.company}
           />
           <Controller
-            name='country'
+            name='countryId'
             control={control}
             rules={{ required: registerData.countryNameReq }}
             defaultValue=''
@@ -181,11 +184,11 @@ const AddUserDrawer = props => {
                 id='select-country'
                 label={<CustomInputLabel htmlFor='select-country' text='Select Country' />}
                 {...field}
-                error={Boolean(errors?.country) || !!apiErrors?.country}
-                helperText={errors?.country?.message || apiErrors?.country}
+                error={Boolean(errors?.countryId) || !!apiErrors?.countryId}
+                helperText={errors?.countryId?.message || apiErrors?.countryId}
               >
                 {countryData?.map(country => (
-                  <MenuItem value={country?.name} key={country?.id}>
+                  <MenuItem value={country?.id} key={country?.id}>
                     {country?.name}
                   </MenuItem>
                 ))}
@@ -217,30 +220,6 @@ const AddUserDrawer = props => {
               </TextFieldStyled>
             )}
           />
-          {/* <Controller
-            name='plan'
-            control={control}
-            rules={{ required: true }}
-            defaultValue=''
-            render={({ field }) => (
-              <TextFieldStyled
-                select
-                fullWidth
-                id='select-plan'
-                label='Select Plan'
-                variant='filled'
-                InputLabelProps={{ shrink: true }}
-                {...field}
-                error={Boolean(errors.plan)}
-              >
-                {plansData?.map(plan => (
-                  <MenuItem value={plan.plan} key={plan.id}>
-                    {plan.plan}
-                  </MenuItem>
-                ))}
-              </TextFieldStyled>
-            )}
-          /> */}
           <Controller
             name='profileStatus'
             control={control}

@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: '/:lang(en|fr|ar)',
-        destination: '/:lang/dashboards/analytics',
+        destination: '/:lang/dashboards',
         permanent: true,
         locale: false
       },

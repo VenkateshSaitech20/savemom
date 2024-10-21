@@ -82,6 +82,11 @@ const ConfirmationDialog = ({ open, setOpen, type, onConfirm, errorMsg }) => {
               {type === 'delete-customer' && 'Are you sure?'}
               {type === 'delete-template' && 'Are you sure you want to delete template?'}
               {type === 'delete-country' && 'Are you sure want to delete the country?'}
+              {type === 'delete-state' && 'Are you sure want to delete the state?'}
+              {type === 'delete-district' && 'Are you sure want to delete the district?'}
+              {type === 'delete-city' && 'Are you sure want to delete the city?'}
+              {type === 'delete-category' && 'Are you sure want to delete the category?'}
+              {type === 'delete-content' && 'Are you sure want to delete the content?'}
             </Typography>
             {type === 'suspend-account' && (
               <Typography color='text.primary'>You won&#39;t be able to revert user!</Typography>
@@ -93,7 +98,7 @@ const ConfirmationDialog = ({ open, setOpen, type, onConfirm, errorMsg }) => {
               <Typography color='text.primary'>You won&#39;t be able to revert customer!</Typography>
             )}
             {errorMsg && (
-              <Typography className="text-red-500">{errorMsg}</Typography>
+              <Typography className="text-red-500 mt-2">{errorMsg}</Typography>
             )}
           </Wrapper>
         </DialogContent>

@@ -10,7 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import DialogCloseButton from '../DialogCloseButton';
 import TextFieldStyled from '@core/components/mui/TextField';
-import { countryData, profileStatus, registerData, responseData } from '@/utils/message';
+import { profileStatus, registerData, responseData } from '@/utils/message';
 import { Controller, useForm } from 'react-hook-form';
 import { capitalizeFirstLetter } from '@/utils/helper';
 import { signOut } from 'next-auth/react';
@@ -18,13 +18,12 @@ import PropTypes from "prop-types";
 import Loader from '@/components/loader';
 import apiClient from '@/utils/apiClient';
 import CustomInputLabel from '@/components/asterick';
-
 const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [apiErrors, setApiErrors] = useState({});
     const [userRoles, setUserRoles] = useState([]);
+    const [countryData, setCountryData] = useState([]);
     const { register, handleSubmit, control, formState: { errors }, reset } = useForm();
-
     useEffect(() => {
         if (open && data) {
             reset({
@@ -32,20 +31,17 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
                 email: data?.email || '',
                 profileStatus: capitalizeFirstLetter(data?.profileStatus) || '',
                 contactNo: data?.contactNo || '',
-                country: data?.country || '',
+                countryId: data?.countryId || '',
                 roleId: data?.roleId || '',
             });
         }
     }, [data, open, reset]);
-
     // States
     // const [userData, setUserData] = useState(false)
-
     const handleClose = () => {
         setOpen(false)
         // reset()
     };
-
     const handleUpdateUserData = async (data) => {
         setIsLoading(true);
         delete data.email;
@@ -67,7 +63,6 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
         }
         setIsLoading(false);
     };
-
     const getUserRole = async () => {
         const response = await apiClient.post('/api/user-role/get-roles-by-user-id', {})
         if (response.data.result === true) {
@@ -79,11 +74,18 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
             }
         }
     };
-
+    const getCountry = async () => {
+        setIsLoading(true);
+        const response = await apiClient.get('/api/master-data-settings/country');
+        if (response.data.result === true) {
+            setCountryData(response.data.message);
+            setIsLoading(false);
+        }
+    };
     useEffect(() => {
-        getUserRole()
+        getUserRole();
+        getCountry();
     }, []);
-
     return (
         <Dialog
             fullWidth
@@ -184,7 +186,6 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
                                 )}
                             />
                         </Grid>
-
                         <Grid item xs={12} sm={6}>
                             <TextFieldStyled
                                 fullWidth
@@ -199,7 +200,7 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <Controller
-                                name='country'
+                                name='countryId'
                                 control={control}
                                 rules={{ required: registerData.countryNameReq }}
                                 defaultValue=''
@@ -212,11 +213,11 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
                                         variant='filled'
                                         InputLabelProps={{ shrink: true }}
                                         {...field}
-                                        error={Boolean(errors.country) || !!apiErrors?.country}
-                                        helperText={errors.country ? errors.country.message : '' || !!apiErrors?.country}
+                                        error={Boolean(errors.countryId) || !!apiErrors?.countryId}
+                                        helperText={errors.countryId ? errors.countryId.message : '' || !!apiErrors?.countryId}
                                     >
                                         {countryData?.map((country) => (
-                                            <MenuItem value={country.name} key={country.id}>
+                                            <MenuItem value={country.id} key={country.id}>
                                                 {country.name}
                                             </MenuItem>
                                         ))}
@@ -224,12 +225,6 @@ const EditUserInfo = ({ open, setOpen, data, id, handleUserDataUpdate, showToast
                                 )}
                             />
                         </Grid>
-                        {/* <Grid item xs={12}>
-              <FormControlLabel
-                control={<Switch defaultChecked={userData} />}
-                label='Use as a billing addressUse as a billing address?'
-              />
-            </Grid> */}
                     </Grid>
                 </DialogContent>
                 <DialogActions className='justify-center pbs-0 sm:pbe-16 sm:pli-16'>

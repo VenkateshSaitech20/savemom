@@ -23,7 +23,7 @@ export async function POST(req) {
             return NextResponse.json({ result: false, message: { userNotFound: responseData.userNotFound } });
         }
         const body = await req.json();
-        let { name, company, contactNo, country, email, profileStatus, roleId, password, roleName } = body;
+        let { name, company, contactNo, countryId, email, profileStatus, roleId, password, roleName } = body;
         const emptyFieldErrors = {};
         if (name.trim() === "") {
             emptyFieldErrors.name = registerData.nameReq;
@@ -34,8 +34,8 @@ export async function POST(req) {
         if (password.trim() === "") {
             emptyFieldErrors.password = registerData.passwordReq;
         }
-        if (country.trim() === "") {
-            emptyFieldErrors.country = registerData.countryNameReq;
+        if (!countryId) {
+            emptyFieldErrors.countryId = registerData.countryNameReq;
         }
         if (roleId === "" || roleName === "") {
             emptyFieldErrors.roleId = registerData.roleNameReq;
@@ -46,13 +46,13 @@ export async function POST(req) {
         if (Object.keys(emptyFieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: emptyFieldErrors });
         };
-        const fields = { name, company, contactNo, country, email, profileStatus, roleName };
+        const fields = { name, company, contactNo, countryId, email, profileStatus, roleName };
         const validatingFields = {
             name: { type: "name", message: registerData.nameFieldVal },
             email: { type: "email", message: registerData.emailValMsg },
             company: { type: "name", message: registerData.companyFieldVal },
             contactNo: { type: "mobileNumber", message: registerData.phoneValMsg },
-            country: { type: "name", message: registerData.countryFieldVal },
+            countryId: { type: "number", message: registerData.countryIdFieldVal },
             profileStatus: { type: "name", message: registerData.statusFieldVal },
             roleName: { type: "name", message: registerData.roleFieldVal }
         };
@@ -60,6 +60,9 @@ export async function POST(req) {
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
         };
+        const countryRow = await prisma.country.findFirst({ select: { name: true, phoneCode: true }, where: { id: countryId } });
+        const country = countryRow.name;
+        const phoneCode = countryRow.phoneCode;
         const hashedPassword = await hashPassword(password);
         const errors = {};
         const getUser = await prisma.user.findUnique({ where: { id: createdBy } });
@@ -89,6 +92,8 @@ export async function POST(req) {
                 companyName: company,
                 contactNo,
                 country,
+                countryId,
+                phoneCode,
                 profileStatus: profileStatus.toLowerCase(),
                 roleName,
             }

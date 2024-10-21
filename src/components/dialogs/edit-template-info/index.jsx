@@ -18,7 +18,7 @@ import CustomInputLabel from '@/components/asterick';
 import { MenuItem } from '@mui/material';
 import { showToast } from '@/utils/helper';
 
-const EditTemplateInfo = ({ open, setOpen, data, id, handleTemplateUpdate, emailPermission }) => {
+const EditTemplateInfo = ({ open, setOpen, data, id, handleTemplateUpdate, emailPermission, flag }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [apiErrors, setApiErrors] = useState({});
     const { register, handleSubmit, control, formState: { errors }, reset } = useForm();
@@ -41,7 +41,16 @@ const EditTemplateInfo = ({ open, setOpen, data, id, handleTemplateUpdate, email
     const handleUpdateTemplateData = async (data) => {
         setIsLoading(true);
         if (id) data.id = id;
-        const { data: { result, message } } = await apiClient.post('/api/email/template', data);
+        // const endpoint = flag === "email" ? '/api/email/template' : '/api/sms/template';
+        let endpoint;
+        if (flag === "email") {
+            endpoint = '/api/email/template';
+        } else if (flag === "voice-call") {
+            endpoint = '/api/voice-call/template';
+        } else {
+            endpoint = '/api/sms/template';
+        }
+        const { data: { result, message } } = await apiClient.post(endpoint, data);
         if (result === true) {
             handleTemplateUpdate(message);
             setOpen(false);
@@ -158,6 +167,7 @@ EditTemplateInfo.propTypes = {
     handleTemplateUpdate: PropTypes.any,
     showToast: PropTypes.any,
     emailPermission: PropTypes.any,
+    flag: PropTypes.string,
 };
 
 export default EditTemplateInfo

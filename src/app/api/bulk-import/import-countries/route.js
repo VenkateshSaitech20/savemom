@@ -33,13 +33,17 @@ export async function POST(req) {
                     await prisma.country.update({
                         where: { id: cid },
                         data: {
-                            name: capitalizeFirstLetter(country.name)
+                            name: capitalizeFirstLetter(country.name),
+                            shortname: country.shortname.toUpperCase(),
+                            phoneCode: String(country.phoneCode)
                         }
                     });
                 } else {
                     await prisma.country.create({
                         data: {
-                            name: capitalizeFirstLetter(country.name)
+                            name: capitalizeFirstLetter(country.name),
+                            shortname: country.shortname.toUpperCase(),
+                            phoneCode: String(country.phoneCode)
                         },
                     });
                 }

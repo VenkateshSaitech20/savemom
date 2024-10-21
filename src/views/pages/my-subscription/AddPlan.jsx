@@ -137,7 +137,7 @@ const AddPlan = props => {
                 </IconButton>
             </div>
             <Divider />
-            <div className='p-6'>
+            <div>
                 <CardContent>
                     <div className='flex max-sm:flex-col items-center gap-6'>
                         <img height={100} width={100} className='rounded' src={packageImgSrc || defaultImage} alt='Logo' />

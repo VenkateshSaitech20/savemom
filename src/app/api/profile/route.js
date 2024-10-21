@@ -51,9 +51,8 @@ export async function PUT(req) {
         for (const [key, value] of formData.entries()) {
             fields[key] = value;
         }
-        const { name, email, contactNo, address, state, zipCode, country, companyName } = fields;
+        const { name, email, contactNo, address, stateId, zipCode, countryId, companyName } = fields;
         const emptyFieldErrors = {};
-
         if (name.trim() === "") {
             emptyFieldErrors.name = registerData.nameReq;
         }
@@ -68,14 +67,28 @@ export async function PUT(req) {
             email: { type: "email", message: registerData.emailValMsg },
             contactNo: { type: "mobileNumber", message: registerData.phoneValMsg },
             address: { type: "address", message: registerData.addressValMsg },
-            state: { type: "name", message: registerData.nameFieldVal },
             zipCode: { type: "number", message: registerData.zipFieldVal },
-            country: { type: "name", message: registerData.countryFieldVal },
             companyName: { type: "name", message: registerData.companyFieldVal },
         }
         let fieldErrors = validateFields(fields, validatingFields);
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
+        }
+        let country = "";
+        let phoneCode = "";
+        let state = "";
+        let countryIdInt = null;
+        let stateIdInt = null;
+        if (countryId) {
+            countryIdInt = parseInt(countryId, 10);
+            const countryDetail = await prisma.country.findFirst({ select: { name: true, phoneCode: true }, where: { id: countryIdInt } });
+            country = countryDetail.name;
+            phoneCode = countryDetail.phoneCode;
+        }
+        if (stateId) {
+            stateIdInt = parseInt(stateId, 10);
+            const stateDetail = await prisma.state.findFirst({ where: { id: stateIdInt } });
+            state = stateDetail.name;
         }
         const errors = {};
         const existsEmail = await prisma.user.findFirst({
@@ -114,8 +127,11 @@ export async function PUT(req) {
                 contactNo,
                 address,
                 state,
+                stateId: stateIdInt,
                 zipCode,
                 country,
+                phoneCode,
+                countryId: countryIdInt,
                 companyName,
                 image: profileImageUrl || oldImageUrl
             }
@@ -132,7 +148,8 @@ export async function PUT(req) {
 
         return NextResponse.json({ result: true, message: responseData.profileUpdated });
     } catch (error) {
-        return NextResponse.json({ result: false, message: error });
+        console.log("ERROR IN PUT: ", error.message);
+        return NextResponse.json({ result: false, message: error.message });
     }
 }
 

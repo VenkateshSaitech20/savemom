@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { registerData, responseData } from '@/utils/message';
-import { capitalizeFirstLetter, extractTokenData } from '@/utils/helper';
-import { validateFields } from '../../api-utlis/helper';
+import { extractTokenData, capitalizeFirstLetter } from '@/utils/helper';
+import { deleteFields, validateFields } from '../../api-utlis/helper';
 const prisma = new PrismaClient();
 export async function GET() {
     try {
-        const ourTeam = await prisma.country.findMany({ where: { isDeleted: "N" } });
-        deleteFields(ourTeam, ['createdAt', 'updatedAt', 'updatedUser']);
-        return NextResponse.json({ result: true, message: ourTeam });
+        const countries = await prisma.country.findMany({ where: { isDeleted: "N" } });
+        deleteFields(countries, ['createdAt', 'updatedAt', 'updatedUser']);
+        return NextResponse.json({ result: true, message: countries });
     } catch (error) {
         return NextResponse.json({ result: false, error: error.message });
     }
@@ -26,15 +26,14 @@ export async function POST(req) {
         }
         if (user?.id) { userId = user.id }
         const body = await req.json();
-        const { phoneCode, isActive, id } = body;
-        let sortname = body?.sortname?.toUpperCase();
-        let name = capitalizeFirstLetter(body?.name);
+        const { name, phoneCode, isActive, id } = body;
+        let shortname = body?.shortname.toUpperCase();
         const emptyFieldErrors = {};
         if (!name || name?.trim() === "") {
             emptyFieldErrors.name = registerData.countryNameReq;
         }
-        if (!sortname || sortname?.trim() === "") {
-            emptyFieldErrors.sortname = registerData.sortnameReq;
+        if (!shortname || shortname?.trim() === "") {
+            emptyFieldErrors.shortname = registerData.shortnameReq;
         }
         if (!phoneCode || phoneCode?.trim() === "") {
             emptyFieldErrors.phoneCode = registerData.phnCodeReq;
@@ -44,15 +43,17 @@ export async function POST(req) {
         };
         const validatingFields = {
             name: { type: "name", message: registerData.countryFieldVal },
-            sortname: { type: "sortname", message: registerData.sortnameFieldVal },
-            phoneCode: { type: "number", message: registerData.phoneCodeFieldVal },
+            shortname: { type: "shortname", message: registerData.shortnameFieldVal },
+            phoneCode: { type: "phoneCode", message: registerData.phoneCodeFieldVal },
         };
-        const fields = { name, sortname, phoneCode };
+        const fields = { name, shortname, phoneCode };
         let fieldErrors = validateFields(fields, validatingFields);
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
         };
-        const data = { name, sortname, phoneCode, isActive };
+        const data = { phoneCode, isActive };
+        data.name = capitalizeFirstLetter(name);
+        data.shortname = shortname;
         if (id) {
             data.updatedUser = userId;
             const existingRec = await prisma.country.findUnique({ where: { id: id } });
@@ -67,9 +68,9 @@ export async function POST(req) {
             if (existCountry) {
                 errors.name = responseData.countryExists;
             }
-            const existSortName = await prisma.country.findFirst({ where: { sortname: sortname, isDeleted: "N" } });
-            if (existSortName) {
-                errors.sortname = responseData.sortnameExists;
+            const existShortName = await prisma.country.findFirst({ where: { shortname: shortname, isDeleted: "N" } });
+            if (existShortName) {
+                errors.shortname = responseData.shortnameExists;
             }
             const existPhoneCode = await prisma.country.findFirst({ where: { phoneCode: phoneCode, isDeleted: "N" } });
             if (existPhoneCode) {

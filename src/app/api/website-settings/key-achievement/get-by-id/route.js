@@ -7,7 +7,6 @@ export async function POST(req) {
     try {
         const body = await req.json();
         const { id } = body;
-        console.log('id', id)
         const details = await prisma.key_achievements.findUnique({ where: { id, isDeleted: "N" } });
         if (details) {
             deleteFields(details, ['createdAt', 'updatedAt', 'updatedUser', "isDeleted"]);

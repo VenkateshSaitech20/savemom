@@ -1,84 +1,80 @@
-import { extractTokenData } from '@/utils/helper';
-import { createTransporter, mailOptions, nodemailerCredential } from '../api-utlis/nodemailer';
-import { NextResponse } from 'next/server';
-import { registerData, responseData } from '@/utils/message';
 import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import { sendMail, getFromEmail } from '../api-utlis/mailService';
+import { extractTokenData } from '@/utils/helper';
+import { registerData, responseData } from '@/utils/message';
 import { validateFields } from '../api-utlis/helper';
+
 const prisma = new PrismaClient();
 
-// Send email
 export async function POST(req) {
     const token = extractTokenData(req.headers);
     if (!token.id) {
         return NextResponse.json({ result: false, message: { tokenExpired: responseData.tokenExpired } });
     }
-    const user = await prisma.user.findUnique({ where: { id: token.id, isDeleted: "N" } });
+    const user = await prisma.user.findUnique({ where: { id: token.id, isDeleted: 'N' } });
     if (!user) {
         return NextResponse.json({ result: false, message: { userNotFound: responseData.userNotFound } });
     }
-    let userId = token.id;
     const body = await req.json();
     const { to, subject, message, sendMailTo, templateId, templateCategory } = body;
     const emptyFieldErrors = {};
-    const email = await nodemailerCredential();
-    const transporter = await createTransporter();
-
-    // For all-users
-    if (sendMailTo === "all-users") {
-        const userEmails = await prisma.user.findMany({ where: { isDeleted: "N" }, select: { email: true } });
-        const emailList = userEmails.map(userEmail => userEmail.email).join(", ");
-        const sendMailPromises = userEmails.map(async (userEmail) => {
-            const individualMailOptions = mailOptions(userEmail.email, subject, message);
-            try {
-                await transporter.sendMail(individualMailOptions);
-            } catch (error) {
-                console.error(`Failed to send email to ${userEmail.email}:`, error.message);
-            }
-        });
-        await Promise.all(sendMailPromises);
-        await prisma.sent_emails.create({
-            data: {
-                from: email,
-                to: emailList,
-                subject: subject,
-                message: message,
-                sendMailTo: sendMailTo,
-                sentBy: userId,
-                templateId: templateId,
-                templateCategory: templateCategory
-            },
-        });
-        return NextResponse.json({ result: true, message: responseData.emailSentSuccMsg });
+    // Handle "all-users" email sending
+    if (sendMailTo === 'all-users') {
+        try {
+            const users = await prisma.user.findMany({ where: { isDeleted: 'N' }, select: { email: true } });
+            const emailList = users.map(user => user.email).join(', ');
+            const sendMailPromises = users.map(user =>
+                sendMail(user.email, subject, message)
+            );
+            const email = getFromEmail();
+            await Promise.all(sendMailPromises);
+            await prisma.sent_emails.create({
+                data: {
+                    from: email,
+                    to: emailList,
+                    subject,
+                    message,
+                    sendMailTo,
+                    sentBy: token.id,
+                    templateId,
+                    templateCategory,
+                },
+            });
+            return NextResponse.json({ result: true, message: responseData.emailSentSuccMsg });
+        } catch (error) {
+            return NextResponse.json({ result: false, error: error.message });
+        }
     } else {
-        // For single user
-        if (!to || to.trim() === "") {
+        // Handle single email sending
+        if (!to || to.trim() === '') {
             emptyFieldErrors.to = registerData.emailReq;
         }
         if (Object.keys(emptyFieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: emptyFieldErrors });
         }
         const validatingFields = {
-            to: { type: "email", message: registerData.emailValMsg },
+            to: { type: 'email', message: registerData.emailValMsg },
         };
-        let fieldErrors = validateFields({ to }, validatingFields);
+        const fieldErrors = validateFields({ to }, validatingFields);
         if (Object.keys(fieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: fieldErrors });
         }
-        const customMailOptions = mailOptions(to, subject, message);
         try {
+            await sendMail(to, subject, message);
+            const email = getFromEmail();
             await prisma.sent_emails.create({
                 data: {
                     from: email,
-                    to: to,
-                    subject: subject,
-                    message: message,
-                    sendMailTo: sendMailTo,
-                    sentBy: userId,
-                    templateId: templateId,
-                    templateCategory: templateCategory
+                    to,
+                    subject,
+                    message,
+                    sendMailTo,
+                    sentBy: token.id,
+                    templateId,
+                    templateCategory,
                 },
             });
-            await transporter.sendMail(customMailOptions);
             return NextResponse.json({ result: true, message: responseData.emailSentSuccMsg });
         } catch (error) {
             return NextResponse.json({ result: false, error: error.message });

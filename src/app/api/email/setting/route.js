@@ -17,7 +17,9 @@ export async function GET(req) {
             return NextResponse.json({ result: false, message: { userNotFound: responseData.userNotFound } });
         }
         const email_setting = await prisma.email_setting.findFirst();
-        deleteFields(email_setting, ['createdAt', 'updatedAt', 'createdUser', 'updatedUser']);
+        if (email_setting) {
+            deleteFields(email_setting, ['createdAt', 'updatedAt', 'createdUser', 'updatedUser']);
+        }
         return NextResponse.json({ result: true, message: email_setting });
     } catch (error) {
         return NextResponse.json({ result: false, error: error.message });
@@ -36,7 +38,7 @@ export async function POST(req) {
         }
         let userId = user.id;
         const body = await req.json();
-        let { email, password, id, emailType } = body;
+        let { email, password, id, emailType, emailCompany, apiKey } = body;
         const emptyFieldErrors = {};
         if (email.trim() === "") {
             emptyFieldErrors.email = registerData.emailReq;
@@ -44,13 +46,10 @@ export async function POST(req) {
         if (emailType.trim() === "") {
             emptyFieldErrors.emailType = registerData.emailTypeReq;
         }
-        if (password.trim() === "") {
-            emptyFieldErrors.password = registerData.passwordReq;
-        }
         if (Object.keys(emptyFieldErrors).length > 0) {
             return NextResponse.json({ result: false, message: emptyFieldErrors });
         };
-        const fields = { email, password, emailType };
+        const fields = { email, password, emailType, apiKey, emailCompany };
         const validatingFields = {
             email: { type: "email", message: registerData.emailValMsg },
         };

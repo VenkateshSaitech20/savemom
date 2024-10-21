@@ -79,7 +79,7 @@ const EmailTemplateDetail = () => {
                             element={Button}
                             elementProps={buttonProps('Edit', 'primary', 'contained')}
                             dialog={EditTemplateInfo}
-                            dialogProps={{ data: templateData, id: id, handleTemplateUpdate, emailPermission: emailPermission }}
+                            dialogProps={{ data: templateData, id: id, handleTemplateUpdate, emailPermission: emailPermission, flag: 'email' }}
                         />
                     )}
                     <Button variant='tonal' color='secondary' onClick={handleBack}>

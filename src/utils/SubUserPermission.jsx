@@ -12,6 +12,12 @@ const SubUserPermission = () => {
     const [configureSubscriptionPermission, setConfigureSubscriptionPermission] = useState({});
     const [mySubscriptionPermission, setMySubscriptionPermission] = useState({});
     const [emailPermission, setEmailPermission] = useState({});
+    const [smsPermission, setSMSPermission] = useState({});
+    const [voiceCallPermission, setVoiceCallPermission] = useState({});
+    const [masterSettingsPermission, setMasterSettingsPermission] = useState({});
+    const [categoryPermission, setCategoryPermission] = useState({});
+    const [contentPermission, setContentPermission] = useState({});
+    const [mailTemplateSettingsPermission, setMailTemplateSettingsPermission] = useState({});
 
     const fetchPermissions = useCallback(async () => {
         const response = await apiClient.post('/api/menu/permissions', {});
@@ -26,13 +32,19 @@ const SubUserPermission = () => {
             setConfigureSubscriptionPermission(permissions["configure-subscription"] || []);
             setMySubscriptionPermission(permissions["my-subscription"] || []);
             setEmailPermission(permissions["email"] || []);
+            setSMSPermission(permissions["sms"] || []);
+            setVoiceCallPermission(permissions["voice-call"] || []);
+            setMasterSettingsPermission(permissions["location"] || {});
+            setCategoryPermission(permissions["category"] || {});
+            setContentPermission(permissions["content"] || {});
+            setMailTemplateSettingsPermission(permissions["mail-template-settings"] || {});
         }
     }, []);
 
     useEffect(() => {
         fetchPermissions();
     }, [fetchPermissions]);
-    return { dashboardPermission, manageRolesPermission, manageUsersPermission, accountSettingsPermission, systemSettingsPermission, websiteSettingsPermission, configureSubscriptionPermission, mySubscriptionPermission, emailPermission };
+    return { dashboardPermission, manageRolesPermission, manageUsersPermission, accountSettingsPermission, systemSettingsPermission, websiteSettingsPermission, configureSubscriptionPermission, mySubscriptionPermission, emailPermission, smsPermission, voiceCallPermission, masterSettingsPermission, categoryPermission, contentPermission, mailTemplateSettingsPermission };
 };
 
 export default SubUserPermission;

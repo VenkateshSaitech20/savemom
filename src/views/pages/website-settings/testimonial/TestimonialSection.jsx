@@ -33,7 +33,7 @@ const TestimonialSection = () => {
         if (response.data.result === true) {
             showToast(true, response.data.message);
             setApiErrors({});
-            getTestimonial();
+            getTestimonial('testimonial');
             setIsButtonLoading(false);
         } else {
             setApiErrors(response.data.message);

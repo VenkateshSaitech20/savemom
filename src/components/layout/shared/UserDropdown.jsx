@@ -16,6 +16,7 @@ import CustomAvatar from '@core/components/mui/Avatar';
 import { useSettings } from '@core/hooks/useSettings';
 import { getLocalizedUrl } from '@/utils/i18n';
 import apiClient from '@/utils/apiClient';
+import GetMenuPath from '@/utils/GetMenuPath';
 
 const BadgeContentSpan = styled('span')({
     width: 8,
@@ -33,11 +34,11 @@ const UserDropdown = () => {
     const router = useRouter();
     const { settings } = useSettings();
     const { lang: locale } = useParams();
+    const { doesPathExist } = GetMenuPath();
 
     const handleDropdownOpen = () => {
         !open ? setOpen(true) : setOpen(false)
     }
-
     const handleDropdownClose = (event, url) => {
         if (url) {
             router.push(getLocalizedUrl(url, locale))
@@ -47,7 +48,6 @@ const UserDropdown = () => {
         }
         setOpen(false)
     }
-
     const handleUserLogout = async () => {
         try {
             await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL })
@@ -56,7 +56,6 @@ const UserDropdown = () => {
             console.error(error);
         }
     }
-
     const getUserProfile = async () => {
         const response = await apiClient.get(`/api/profile`);
         if (response.data.result === true) {
@@ -69,7 +68,6 @@ const UserDropdown = () => {
     useEffect(() => {
         getUserProfile();
     }, []);
-
     return (
         <>
             <Badge

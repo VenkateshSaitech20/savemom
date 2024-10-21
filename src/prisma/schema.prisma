@@ -46,7 +46,10 @@ model user {
   address           String?
   state             String?
   zipCode           String?
+  countryId         Int?
   country           String?
+  stateId           Int?
+  phoneCode         String?   @db.VarChar(8)
   language          String?
   companyName       String?
   roleId            String?      @default("3")
@@ -55,7 +58,17 @@ model user {
   image             String?
   isDeleted         String?      @default("N")
   createdBy         String?
-  subscriptionPlan  String?
+  packageId         String?  
+  packageName       String?  
+  packageValidity   String?
+  purchaseDate      DateTime  @default(now())
+  expirayDate       DateTime?
+  paymentMethod     String?
+  isExpired         String?
+  amount            String?  
+  currency          String?  
+  paymentStatus     String?  
+  paymentId         String?
   account           account[]
   session           session[]
   createdAt         DateTime           @default(now())
@@ -211,7 +224,7 @@ model subscribers {
 model country {
   id        Int      @id @default(autoincrement())
   name      String
-  sortname  String   @db.VarChar(3)
+  shortname  String   @db.VarChar(3)
   phoneCode String   @db.VarChar(8)
   createdUser String?
   createdAt DateTime @default(now())
@@ -226,8 +239,12 @@ model state {
   name      String 
   countryId Int
   country   String
+  createdUser String?
   createdAt DateTime @default(now())
+  updatedUser String?
   updatedAt DateTime @updatedAt
+  isDeleted String   @default("N")
+  isActive  String   @default("Y")
 }
 
 model city {
@@ -237,6 +254,12 @@ model city {
   countryId Int
   state    String
   stateId  Int
+  createdUser String?
+  createdAt DateTime @default(now())
+  updatedUser String?
+  updatedAt DateTime @updatedAt
+  isDeleted String   @default("N")
+  isActive  String   @default("Y")
 }
 
 model district {
@@ -248,8 +271,13 @@ model district {
   state     String
   cityId    Int   
   city      String
+  createdUser String?
+  createdAt DateTime @default(now())
+  updatedUser String?
+  updatedAt DateTime @updatedAt
+  isDeleted String   @default("N")
+  isActive  String   @default("Y")
 }
-
 model section_content {
   id                    Int    @id @default(autoincrement())
   sectionType           String?
@@ -285,7 +313,9 @@ model package_plans {
 model email_setting {
   id                  Int    @id @default(autoincrement())
   email               String? 
+  emailCompany        String?
   emailType           String?
+  apiKey              String?
   password            String?
   createdUserId       String?
   updatedUserId       String?
@@ -330,4 +360,137 @@ model configure_subscription {
   updatedUser        String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+}
+
+model sms_setting {
+  id                  Int    @id @default(autoincrement())
+  mobile              String? 
+  smsType             String?
+  publicKey           String?
+  authKey             String?
+  createdBy           String?
+  updatedBy           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model sent_sms {
+  id                  Int       @id @default(autoincrement())
+  from                String? 
+  to                  String?   @db.LongText
+  message             String?   @db.LongText
+  templateId          Int?
+  templateCategory    String?
+  sentBy              String?
+  sendSMSTo           String?
+  createdAt           DateTime  @default(now())
+}
+
+model sms_templates {
+  id                  Int       @id @default(autoincrement())
+  category            String? 
+  slugCategory        String? 
+  message             String?   @db.LongText
+  isActive            String?
+  isDeleted           String?   @default("N")
+  createdBy           String?
+  updatedBy           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model voice_call_setting {
+  id                  Int    @id @default(autoincrement())
+  mobile              String? 
+  voiceCallType       String?
+  publicKey           String?
+  authKey             String?
+  createdBy           String?
+  updatedBy           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model sent_voice_call {
+  id                  Int       @id @default(autoincrement())
+  from                String? 
+  to                  String?   @db.LongText
+  message             String?   @db.LongText
+  templateId          Int?
+  templateCategory    String?
+  sentBy              String?
+  sendVoiceCallTo     String?
+  createdAt           DateTime  @default(now())
+}
+
+model voice_call_templates {
+  id                  Int       @id @default(autoincrement())
+  category            String? 
+  slugCategory        String? 
+  message             String?   @db.LongText
+  isActive            String?
+  isDeleted           String?   @default("N")
+  createdBy           String?
+  updatedBy           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model subscription_list {
+  id                 String    @id @default(cuid())
+  userId             String?  
+  name               String?  
+  email              String?  
+  contactNo          String?  
+  packageId          String?  
+  packageName        String?  
+  packageValidity    String?
+  purchaseDate       DateTime  @default(now())
+  expirayDate        DateTime?
+  paymentMethod      String?
+  isExpired          String?
+  amount             String?  
+  currency           String?  
+  paymentStatus      String?  
+  paymentId          String?  
+}
+
+model categories {
+  id                Int        @id @default(autoincrement())
+  categoryName      String
+  slug              String?
+  isActive          String     @default("Y")
+  isDeleted         String?    @default("N")
+  createdBy         String?
+  updatedBy         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model contents {
+  id                Int        @id @default(autoincrement())
+  image             String?
+  title             String
+  categoryId        String?
+  categoryName      String
+  slug              String?
+  shortContent      String?    @db.VarChar(300)
+  content           String?    @db.VarChar(3000)
+  postedBy          String?
+  isDeleted         String?    @default("N")
+  createdBy         String?
+  updatedBy         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model mail_templates {
+  id                Int        @id @default(autoincrement())
+  subject           String
+  message           String?    @db.VarChar(3000)
+  templateType      String?
+  createdBy         String?
+  updatedBy         String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 }

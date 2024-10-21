@@ -59,7 +59,7 @@ const Login = () => {
       const response = await axios.post('/api/login', data, {});
       if (response.data.result === true) {
         sessionStorage.setItem("token", response.data.message.token);
-        const redirectURL = '/dashboards/analytics';
+        const redirectURL = '/dashboards';
         router.replace(getLocalizedUrl(redirectURL, locale));
         setIsButtonLoading(false);
       } else {

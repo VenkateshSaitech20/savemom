@@ -74,6 +74,7 @@ export const validateImage = (file) => {
 export const validateText = (text, type, validateMessage) => {
     let regex;
     let maxLength;
+    let minLength;
     let lengthMessage;
     let message;
     switch (type) {
@@ -92,6 +93,7 @@ export const validateText = (text, type, validateMessage) => {
         case 'mobileNumber':
             regex = /^(?!0)\d*(?:\.\d+)?$/;
             maxLength = 10;
+            minLength = 10;
             lengthMessage = `Field must not exceed ${maxLength} characters`;
             message = validateMessage;
             break;
@@ -144,13 +146,28 @@ export const validateText = (text, type, validateMessage) => {
             lengthMessage = `Field must not exceed ${maxLength} characters`;
             message = validateMessage;
             break;
+        case 'title':
+            // regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/,&-]*$|^$/;
+            // regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/&?:;"'’-]*$|^$/;
+            // regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/&?:;’‘"“”-!]*$|^$/;
+            regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/&?:;’‘"“”\-!]*$|^$/;
+            maxLength = 200;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
+        case 'shortContent':
+            regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/,&-]*$|^$/; // Description
+            maxLength = 300;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
         case 'descriptionXL':
             regex = /^(?=.*[a-zA-Z])[a-zA-Z0-9\s.,()'"\/,&-]*$|^$/; // Description
             maxLength = 3000;
             lengthMessage = `Field must not exceed ${maxLength} characters`;
             message = validateMessage;
             break;
-        case 'sortname':
+        case 'shortname':
             regex = /^[A-Z]{2,3}$/;
             maxLength = 3;
             lengthMessage = `Field must not exceed ${maxLength} characters`;
@@ -162,11 +179,30 @@ export const validateText = (text, type, validateMessage) => {
             lengthMessage = registerData.discountFieldVal;
             message = validateMessage;
             break;
+        case 'customMobileNumber':
+            regex = /^\+?(?!0)\d*(?:\.\d+)?$/;
+            maxLength = 15;
+            minLength = 10;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
+        case 'phoneCode':
+            regex = /^\+?(?!0)\d*(?:\.\d+)?$/;
+            maxLength = 15;
+            minLength = 2;
+            lengthMessage = `Field must not exceed ${maxLength} characters`;
+            message = validateMessage;
+            break;
         default:
             regex = /^[a-zA-Z\s]*$/;
             maxLength = 100;
             lengthMessage = `Field must not exceed ${maxLength} characters`;
             message = validateMessage || 'Invalid input. Only letters and spaces are allowed.';
+    }
+
+    // For mobile number
+    if (text.length < minLength) {
+        return { valid: false, message: `Mobile number must be exactly ${minLength} digits` };
     }
 
     if (text.length > maxLength) {
@@ -228,3 +264,14 @@ export const processFiles = async (files, uploadDir, urlDir) => {
 export const areAllPermissionsEmpty = (permissions) => {
     return Object.values(permissions).every(array => Array.isArray(array) && array.length === 0);
 };
+
+export const removeHtmlTagsExceptBr = (htmlString) => {
+    return htmlString
+        .replace(/<br\s*\/?>/g, '\n') // Replace <br/> with newline
+        .replace(/<\/?[^>]+(>|$)/g, ''); // Remove all other HTML tags
+};
+
+export const getDate = (timestamp) => {
+    const date = moment(timestamp);
+    return date.format('DD-MM-YYYY');
+}
